@@ -1,38 +1,41 @@
-import { Board, Move, PieceColour, PieceType, Position } from "./chess.types";
+import {
+  Board,
+  GameState,
+  Move,
+  PieceColour,
+  PieceType,
+  Position,
+} from "./chess.types";
 
-export type MovementStrategy = (coordinate: Position, board: Board) => Move[];
+export type MovementStrategy = (position: Position, board: Board) => Move[];
+
+export type MovementStrategyMap = {
+  [key in PieceType]: MovementStrategy;
+};
 
 export const mergeMovementStrategies = (
   strategies: MovementStrategy[],
 ): MovementStrategy => {
-  return (coordinate, board) => {
-    const moves: Position[] = [];
-    const captures: Position[] = [];
-    const castles: Position[] = [];
+  return (position, board) => {
+    const moves: Move[] = [];
 
     strategies.forEach((strategy) => {
-      const {
-        moves: newMoves,
-        captures: newCaptures,
-        castles: newCastles,
-      } = strategy(coordinate, board);
+      const newMoves = strategy(position, board);
       moves.push(...newMoves);
-      captures.push(...newCaptures);
-      castles.push(...newCastles);
     });
-    return { moves, captures, castles };
+    return moves;
   };
 };
 
 export const diagonalMovement: MovementStrategy = (
-  coordinate: Position,
+  position: Position,
   board: Board,
 ) => {
-  const { row, col } = coordinate;
-  const piece = board[row][col];
+  const { row, col } = position;
+  const current = board[row][col];
   const moves: Move[] = [];
 
-  if (!piece) {
+  if (!current) {
     return [];
   }
 
@@ -50,17 +53,21 @@ export const diagonalMovement: MovementStrategy = (
     while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
       const target = board[newRow][newCol];
       if (target) {
-        if (target.colour !== piece.colour) {
+        if (target.colour !== current.colour) {
           moves.push({
-            colour: piece.colour,
+            piece: current,
             from: { row: row, col: col },
             to: { row: newRow, col: newCol },
-            capturedPiece: { colour: target.colour, type: target.colour },
+            capturedPiece: target,
           });
         }
         break;
       }
-      moves.push({ row: newRow, col: newCol });
+      moves.push({
+        piece: current,
+        from: { row: row, col: col },
+        to: { row: newRow, col: newCol },
+      });
       newRow += direction.row;
       newCol += direction.col;
     }
@@ -70,13 +77,12 @@ export const diagonalMovement: MovementStrategy = (
 };
 
 export const linearMovement: MovementStrategy = (
-  coordinate: Position,
+  position: Position,
   board: Board,
 ) => {
-  const { row, col } = coordinate;
-  const moves: Position[] = [];
-  const captures: Position[] = [];
-
+  const { row, col } = position;
+  const current = board[row][col];
+  const moves: Move[] = [];
   const directions = [
     { row: 1, col: 0 },
     { row: -1, col: 0 },
@@ -84,35 +90,49 @@ export const linearMovement: MovementStrategy = (
     { row: 0, col: -1 },
   ];
 
+  if (!current) {
+    return [];
+  }
+
   directions.forEach((direction) => {
     let newRow = row + direction.row;
     let newCol = col + direction.col;
 
     while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-      if (board[newRow][newCol].piece) {
-        if (
-          board[newRow][newCol].piece?.colour !== board[row][col].piece?.colour
-        ) {
-          captures.push({ row: newRow, col: newCol });
+      const target = board[newRow][newCol];
+      if (target) {
+        if (target.colour !== current.colour) {
+          moves.push({
+            piece: current,
+            from: { row: row, col: col },
+            to: { row: newRow, col: newCol },
+            capturedPiece: target,
+          });
         }
         break;
       }
-      moves.push({ row: newRow, col: newCol });
+      moves.push({
+        piece: current,
+        from: { row: row, col: col },
+        to: { row: newRow, col: newCol },
+      });
       newRow += direction.row;
       newCol += direction.col;
     }
   });
 
-  return { moves, captures, castles: [] };
+  return moves;
 };
 
 export const knightMovement: MovementStrategy = (
-  coordinage: Position,
+  position: Position,
   board: Board,
 ) => {
-  const { row, col } = coordinage;
-  const moves: Position[] = [];
-  const captures: Position[] = [];
+  const { row, col } = position;
+  const moves: Move[] = [];
+  const current = board[row][col];
+
+  if (!current) return [];
 
   const directions = [
     { row: 2, col: 1 },
@@ -130,61 +150,79 @@ export const knightMovement: MovementStrategy = (
     const newCol = col + direction.col;
 
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-      if (board[newRow][newCol].piece) {
-        if (
-          board[newRow][newCol].piece?.colour !== board[row][col].piece?.colour
-        ) {
-          captures.push({ row: newRow, col: newCol });
+      const target = board[newRow][newCol];
+      if (target) {
+        if (target.colour !== current.colour) {
+          moves.push({
+            piece: current,
+            from: { row: row, col: col },
+            to: { row: newRow, col: newCol },
+            capturedPiece: target,
+          });
         }
       } else {
-        moves.push({ row: newRow, col: newCol });
+        moves.push({
+          piece: current,
+          from: { row: row, col: col },
+          to: { row: newRow, col: newCol },
+        });
       }
     }
   });
 
-  return { moves, captures, castles: [] };
+  return moves;
 };
 
 export const pawnMovement: MovementStrategy = (
-  coordinate: Position,
+  position: Position,
   board: Board,
 ) => {
-  const { row, col } = coordinate;
-  const piece = board[row][col].piece;
-  const moves: Position[] = [];
-  const captures: Position[] = [];
+  const { row, col } = position;
+  const current = board[row][col];
+  const moves: Move[] = [];
 
-  console.log(coordinate);
-  const direction = piece?.colour === PieceColour.White ? -1 : 1;
+  if (!current) return [];
+
+  const direction = current.colour === PieceColour.WHITE ? -1 : 1;
 
   let newRow = row + direction;
-  if (newRow >= 0 && newRow < 8 && !board[newRow][col].piece) {
-    moves.push({ row: newRow, col });
+  const target = board[newRow][col];
+  if (newRow >= 0 && newRow < 8 && !target) {
+    moves.push({
+      piece: current,
+      from: { row: row, col: col },
+      to: { row: newRow, col: col },
+    });
   }
 
   if (
-    (row === 6 && piece?.colour === PieceColour.White) ||
-    (row === 1 && piece?.colour === PieceColour.Black)
+    (row === 6 && current.colour === PieceColour.WHITE) ||
+    (row === 1 && current.colour === PieceColour.BLACK)
   ) {
     newRow += direction;
-    if (newRow >= 0 && newRow < 8 && !board[newRow][col].piece) {
-      moves.push({ row: newRow, col });
+    if (newRow >= 0 && newRow < 8 && !target) {
+      moves.push({
+        piece: current,
+        from: { row: row, col: col },
+        to: { row: newRow, col: col },
+      });
     }
   }
 
-  return { moves, captures, castles: [] };
+  return moves;
 };
 
 export const pawnCapture: MovementStrategy = (
-  coordinate: Position,
+  position: Position,
   board: Board,
 ) => {
-  const { row, col } = coordinate;
-  const moves: Position[] = [];
-  const captures: Position[] = [];
+  const { row, col } = position;
+  const moves: Move[] = [];
+  const current = board[row][col];
 
-  const direction =
-    board[row][col].piece?.colour === PieceColour.White ? -1 : 1;
+  if (!current) return [];
+
+  const direction = current.colour === PieceColour.WHITE ? -1 : 1;
 
   const directions = [
     { row: direction, col: 1 },
@@ -194,18 +232,20 @@ export const pawnCapture: MovementStrategy = (
   directions.forEach((direction) => {
     const newRow = row + direction.row;
     const newCol = col + direction.col;
-
+    const target = board[newRow][newCol];
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-      if (
-        board[newRow][newCol].piece &&
-        board[newRow][newCol].piece?.colour !== board[row][col].piece?.colour
-      ) {
-        captures.push({ row: newRow, col: newCol });
+      if (target && target.colour !== target.colour) {
+        moves.push({
+          piece: current,
+          from: { row: row, col: col },
+          to: { row: newRow, col: newCol },
+          capturedPiece: target,
+        });
       }
     }
   });
 
-  return { moves, captures, castles: [] };
+  return moves;
 };
 
 export const kingMovement: MovementStrategy = (
@@ -213,8 +253,10 @@ export const kingMovement: MovementStrategy = (
   board: Board,
 ) => {
   const { row, col } = coordingate;
-  const moves: Position[] = [];
-  const captures: Position[] = [];
+  const current = board[row][col];
+  const moves: Move[] = [];
+
+  if (!current) return [];
 
   const directions = [
     { row: 1, col: 0 },
@@ -230,70 +272,100 @@ export const kingMovement: MovementStrategy = (
   directions.forEach((direction) => {
     const newRow = row + direction.row;
     const newCol = col + direction.col;
-
+    const target = board[newRow][newCol];
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-      if (board[newRow][newCol].piece) {
-        if (
-          board[newRow][newCol].piece?.colour !== board[row][col].piece?.colour
-        ) {
-          captures.push({ row: newRow, col: newCol });
+      if (target) {
+        if (target.colour !== target.colour) {
+          moves.push({
+            piece: current,
+            from: { row: row, col: col },
+            to: { row: newRow, col: newCol },
+            capturedPiece: target,
+          });
         }
       } else {
-        moves.push({ row: newRow, col: newCol });
+        moves.push({
+          piece: current,
+          from: { row: row, col: col },
+          to: { row: newRow, col: newCol },
+        });
       }
     }
   });
-  return { moves, captures, castles: [] };
+  return moves;
+};
+
+export const kingHasMoved = (
+  gameState: GameState,
+  colour: PieceColour,
+): boolean => {
+  gameState.history.forEach((move) => {
+    if (move.piece.type === PieceType.KING && move.piece.colour === colour) {
+      return true;
+    }
+  });
+  return false;
 };
 
 export const kingCastle: MovementStrategy = (
-  coordinate: Position,
+  position: Position,
   board: Board,
 ) => {
-  const { row, col } = coordinate;
-  const moves: Position[] = [];
-  const captures: Position[] = [];
-  const castles: Position[] = [];
+  const { row, col } = position;
+  const current = board[row][col];
+  const moves: Move[] = [];
+  const kingHasMoved = false;
+  const kingSideRookHasMoved = false;
+  const queenSideRookHasMoved = false;
 
-  if (board[row][col].piece?.hasMoved) {
-    return { moves, captures, castles };
-  }
+  if (!current) return [];
 
-  const direction =
-    board[row][col].piece?.colour === PieceColour.White ? 1 : -1;
+  const direction = current.colour === PieceColour.WHITE ? 1 : -1;
 
-  const kingSideCastle = board[row][7].piece;
-  const queenSideCastle = board[row][0].piece;
+  const kingSideCastle = board[row][7];
+  const queenSideCastle = board[row][0];
 
   if (
     kingSideCastle &&
-    !kingSideCastle.hasMoved &&
-    !board[row][5].piece &&
-    !board[row][6].piece
+    !kingHasMoved &&
+    !kingSideRookHasMoved &&
+    !board[row][5] &&
+    !board[row][6]
   ) {
-    castles.push({ row, col: 6 });
+    moves.push({
+      piece: current,
+      from: position,
+      to: { row, col: 6 },
+      castle: true,
+    });
   }
 
   if (
     queenSideCastle &&
-    !queenSideCastle.hasMoved &&
-    !board[row][1].piece &&
-    !board[row][2].piece &&
-    !board[row][3].piece
+    !kingHasMoved &&
+    !queenSideRookHasMoved &&
+    !board[row][1] &&
+    !board[row][2] &&
+    !board[row][3]
   ) {
-    castles.push({ row, col: 2 });
+    moves.push({
+      piece: current,
+      from: position,
+      to: { row, col: 2 },
+      castle: true,
+    });
   }
 
-  return { moves, captures, castles };
+  return moves;
 };
 
 export const movementStrategyMap: MovementStrategyMap = {
-  [PieceType.Pawn]: mergeMovementStrategies([pawnMovement, pawnCapture]),
-  [PieceType.Rook]: linearMovement,
-  [PieceType.Knight]: knightMovement,
-  [PieceType.Bishop]: diagonalMovement,
-  [PieceType.Wizard]: mergeMovementStrategies([kingMovement, kingMovement]),
-  [PieceType.Queen]: mergeMovementStrategies([
+  [PieceType.PAWN]: mergeMovementStrategies([pawnMovement, pawnCapture]),
+  [PieceType.ROOK]: linearMovement,
+  [PieceType.KNIGHT]: knightMovement,
+  [PieceType.BISHOP]: diagonalMovement,
+  [PieceType.KING]: mergeMovementStrategies([kingMovement, kingMovement]),
+  [PieceType.QUEEN]: mergeMovementStrategies([
     diagonalMovement,
     linearMovement,
   ]),

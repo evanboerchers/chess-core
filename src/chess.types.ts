@@ -18,6 +18,7 @@ export enum PieceType {
 
 export interface Piece {
   colour: PieceColour;
+  type: PieceType;
 }
 
 export interface Position {
@@ -26,11 +27,12 @@ export interface Position {
 }
 
 export interface Move {
-  colour: PieceColour;
-  to: Position;
+  piece: Piece;
   from: Position;
+  to: Position;
   capturedPiece?: Piece;
   promotionType?: Piece;
+  castle?: boolean;
 }
 
 export interface GameState {
