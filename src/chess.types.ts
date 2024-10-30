@@ -1,6 +1,8 @@
-export type Board = (Piece | null)[][];
+export type BoardSquare = Piece | null;
 
-export enum Colour {
+export type Board = BoardSquare[][];
+
+export enum PieceColour {
   WHITE = "white",
   BLACK = "black",
 }
@@ -15,7 +17,7 @@ export enum PieceType {
 }
 
 export interface Piece {
-  colour: Colour;
+  colour: PieceColour;
 }
 
 export interface Position {
@@ -24,9 +26,15 @@ export interface Position {
 }
 
 export interface Move {
-  colour: Colour;
+  colour: PieceColour;
   to: Position;
   from: Position;
   capturedPiece?: Piece;
   promotionType?: Piece;
+}
+
+export interface GameState {
+  board: Board;
+  currentTurn: PieceColour;
+  history: Move[];
 }
