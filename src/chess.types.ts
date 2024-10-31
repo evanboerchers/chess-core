@@ -35,8 +35,17 @@ export interface Move {
   castle?: boolean;
 }
 
+export interface ColourState {
+  kingSide: boolean;
+  queenSide: boolean;
+}
+
 export interface GameState {
   board: Board;
   currentTurn: PieceColour;
+  castlePrivileges: {
+    [PieceColour.WHITE]: ColourState
+    [PieceColour.BLACK]: ColourState
+  };
   history: Move[];
 }

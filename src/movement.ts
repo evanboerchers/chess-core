@@ -2,18 +2,14 @@ import {
   Board,
   GameState,
   Move,
+  Piece,
   PieceColour,
   PieceType,
   Position,
 } from "./chess.types";
+import { MovementStrategy, MovementStrategyMap } from "./movement.types";
 
-export type MovementStrategy = (position: Position, board: Board) => Move[];
-
-export type MovementStrategyMap = {
-  [key in PieceType]: MovementStrategy;
-};
-
-export const mergeMovementStrategies = (
+const mergeMovementStrategies = (
   strategies: MovementStrategy[],
 ): MovementStrategy => {
   return (position, board) => {
@@ -27,10 +23,11 @@ export const mergeMovementStrategies = (
   };
 };
 
-export const diagonalMovement: MovementStrategy = (
+const diagonalMovement: MovementStrategy = (
+  gameState: GameState,
   position: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = position;
   const current = board[row][col];
   const moves: Move[] = [];
@@ -76,10 +73,11 @@ export const diagonalMovement: MovementStrategy = (
   return moves;
 };
 
-export const linearMovement: MovementStrategy = (
+const linearMovement: MovementStrategy = (
+  gameState: GameState,
   position: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = position;
   const current = board[row][col];
   const moves: Move[] = [];
@@ -124,10 +122,11 @@ export const linearMovement: MovementStrategy = (
   return moves;
 };
 
-export const knightMovement: MovementStrategy = (
+const knightMovement: MovementStrategy = (
+  gameState: GameState,
   position: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = position;
   const moves: Move[] = [];
   const current = board[row][col];
@@ -173,10 +172,11 @@ export const knightMovement: MovementStrategy = (
   return moves;
 };
 
-export const pawnMovement: MovementStrategy = (
+const pawnMovement: MovementStrategy = (
+  gameState: GameState,
   position: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = position;
   const current = board[row][col];
   const moves: Move[] = [];
@@ -212,10 +212,11 @@ export const pawnMovement: MovementStrategy = (
   return moves;
 };
 
-export const pawnCapture: MovementStrategy = (
+const pawnCapture: MovementStrategy = (
+  gameState: GameState,
   position: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = position;
   const moves: Move[] = [];
   const current = board[row][col];
@@ -248,10 +249,11 @@ export const pawnCapture: MovementStrategy = (
   return moves;
 };
 
-export const kingMovement: MovementStrategy = (
+const kingMovement: MovementStrategy = (
+  gameState: GameState,
   coordingate: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = coordingate;
   const current = board[row][col];
   const moves: Move[] = [];
@@ -295,22 +297,11 @@ export const kingMovement: MovementStrategy = (
   return moves;
 };
 
-export const kingHasMoved = (
+const kingCastle: MovementStrategy = (
   gameState: GameState,
-  colour: PieceColour,
-): boolean => {
-  gameState.history.forEach((move) => {
-    if (move.piece.type === PieceType.KING && move.piece.colour === colour) {
-      return true;
-    }
-  });
-  return false;
-};
-
-export const kingCastle: MovementStrategy = (
   position: Position,
-  board: Board,
 ) => {
+  const board = gameState.board
   const { row, col } = position;
   const current = board[row][col];
   const moves: Move[] = [];
@@ -364,7 +355,7 @@ export const movementStrategyMap: MovementStrategyMap = {
   [PieceType.ROOK]: linearMovement,
   [PieceType.KNIGHT]: knightMovement,
   [PieceType.BISHOP]: diagonalMovement,
-  [PieceType.KING]: mergeMovementStrategies([kingMovement, kingMovement]),
+  [PieceType.KING]: mergeMovementStrategies([kingMovement, kingMovement, kingCastle]),
   [PieceType.QUEEN]: mergeMovementStrategies([
     diagonalMovement,
     linearMovement,
