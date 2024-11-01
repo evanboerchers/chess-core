@@ -1,7 +1,7 @@
-import { Position, Board, Move, PieceType, GameState } from "./chess.types";
+import { Position, Move, PieceType, GameState } from "./chess.types";
 
-export type MovementStrategy = (gameState: GameState, position: Position ) => Move[];
+export type MovementStrategy<T> = (gameState: GameState, position: Position ) => T[];
 
-export type MovementStrategyMap = {
-  [key in PieceType]: MovementStrategy;
+export type MovementStrategyMap<T> = {
+  [key in PieceType]: MovementStrategy<T>;
 };

@@ -7,13 +7,13 @@ import {
   PieceType,
   Position,
 } from "./chess.types";
-import { MovementStrategy, MovementStrategyMap } from "./movement.types";
+import { AttackZoneStrategy, MovementStrategy, MovementStrategyMap } from "./movement.types";
 
-const mergeMovementStrategies = (
-  strategies: MovementStrategy[],
-): MovementStrategy => {
+const mergeMovementStrategies = <T>(
+  strategies: MovementStrategy<T>[],
+): MovementStrategy<T> => {
   return (position, board) => {
-    const moves: Move[] = [];
+    const moves: T[] = [];
 
     strategies.forEach((strategy) => {
       const newMoves = strategy(position, board);
@@ -23,7 +23,7 @@ const mergeMovementStrategies = (
   };
 };
 
-const diagonalMovement: MovementStrategy = (
+const diagonalMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -73,7 +73,48 @@ const diagonalMovement: MovementStrategy = (
   return moves;
 };
 
-const linearMovement: MovementStrategy = (
+const diagonalAttackZone: MovementStrategy<Position> = (
+  gameState: GameState,
+  position: Position,
+) => {
+  const board = gameState.board
+  const { row, col } = position;
+  const current = board[row][col];
+  const positions: Position[] = [];
+
+  if (!current) {
+    return [];
+  }
+
+  const directions = [
+    { row: 1, col: 1 },
+    { row: 1, col: -1 },
+    { row: -1, col: 1 },
+    { row: -1, col: -1 },
+  ];
+
+  directions.forEach((direction) => {
+    let newRow = row + direction.row;
+    let newCol = col + direction.col;
+
+    while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+      const target = board[newRow][newCol];
+      if (target) {
+        positions.push({ row: newRow, col: newCol });
+        break;
+      }
+      positions.push({
+        row: newRow, col: newCol
+      });
+      newRow += direction.row;
+      newCol += direction.col;
+    }
+  });
+
+  return positions;
+};
+
+const linearMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -122,7 +163,45 @@ const linearMovement: MovementStrategy = (
   return moves;
 };
 
-const knightMovement: MovementStrategy = (
+const linearAttackZone: MovementStrategy<Position> = (
+  gameState: GameState,
+  position: Position,
+) => {
+  const board = gameState.board
+  const { row, col } = position;
+  const current = board[row][col];
+  const positions: Position[] = [];
+  const directions = [
+    { row: 1, col: 0 },
+    { row: -1, col: 0 },
+    { row: 0, col: 1 },
+    { row: 0, col: -1 },
+  ];
+
+  if (!current) {
+    return [];
+  }
+
+  directions.forEach((direction) => {
+    let newRow = row + direction.row;
+    let newCol = col + direction.col;
+
+    while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+      const target = board[newRow][newCol];
+      if (target) {
+        positions.push({ row: newRow, col: newCol });
+        break;
+      }
+      positions.push({ row: newRow, col: newCol });
+      newRow += direction.row;
+      newCol += direction.col;
+    }
+  });
+
+  return positions;
+};
+
+const knightMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -172,7 +251,41 @@ const knightMovement: MovementStrategy = (
   return moves;
 };
 
-const pawnMovement: MovementStrategy = (
+const knightAttackZone: MovementStrategy<Position> = (
+  gameState: GameState,
+  position: Position,
+) => {
+  const board = gameState.board
+  const { row, col } = position;
+  const positions: Position[] = [];
+  const current = board[row][col];
+
+  if (!current) return [];
+
+  const directions = [
+    { row: 2, col: 1 },
+    { row: 2, col: -1 },
+    { row: -2, col: 1 },
+    { row: -2, col: -1 },
+    { row: 1, col: 2 },
+    { row: 1, col: -2 },
+    { row: -1, col: 2 },
+    { row: -1, col: -2 },
+  ];
+
+  directions.forEach((direction) => {
+    const newRow = row + direction.row;
+    const newCol = col + direction.col;
+
+    if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+      positions.push({ row: newRow, col: newCol });
+    }
+  });
+
+  return positions;
+};
+
+const pawnMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -212,7 +325,7 @@ const pawnMovement: MovementStrategy = (
   return moves;
 };
 
-const pawnCapture: MovementStrategy = (
+const pawnCapture: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -249,7 +362,41 @@ const pawnCapture: MovementStrategy = (
   return moves;
 };
 
-const kingMovement: MovementStrategy = (
+const pawnAttackZone: MovementStrategy<Position> = (
+  gameState: GameState,
+  position: Position
+) => {
+  const board = gameState.board
+  const { row, col } = position;
+  const positions: Position[] = [];
+  const current = board[row][col];
+
+  if (!current) return [];
+
+  const direction = current.colour === PieceColour.WHITE ? -1 : 1;
+
+  const directions = [
+    { row: direction, col: 1 },
+    { row: direction, col: -1 },
+  ];
+
+  directions.forEach((direction) => {
+    const newRow = row + direction.row;
+    const newCol = col + direction.col;
+    const target = board[newRow][newCol];
+    if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+      if (target && target.colour !== target.colour) {
+        positions.push({ row: newRow, col: newCol });
+      } else {
+        positions.push({ row: newRow, col: newCol })
+      }
+    }
+  });
+
+  return positions;
+}
+
+const kingMovement: MovementStrategy<Move> = (
   gameState: GameState,
   coordingate: Position,
 ) => {
@@ -297,7 +444,39 @@ const kingMovement: MovementStrategy = (
   return moves;
 };
 
-const kingCastle: MovementStrategy = (
+const kingAttackZone: MovementStrategy<Position> = (
+  gameState: GameState,
+  coordingate: Position,
+) => {
+  const board = gameState.board
+  const { row, col } = coordingate;
+  const current = board[row][col];
+  const positions: Position[] = [];
+
+  if (!current) return [];
+
+  const directions = [
+    { row: 1, col: 0 },
+    { row: -1, col: 0 },
+    { row: 0, col: 1 },
+    { row: 0, col: -1 },
+    { row: 1, col: 1 },
+    { row: 1, col: -1 },
+    { row: -1, col: 1 },
+    { row: -1, col: -1 },
+  ];
+
+  directions.forEach((direction) => {
+    const newRow = row + direction.row;
+    const newCol = col + direction.col;
+    if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+        positions.push({ row: newRow, col: newCol });
+    }
+  });
+  return positions;
+};
+
+const kingCastle: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -350,14 +529,26 @@ const kingCastle: MovementStrategy = (
   return moves;
 };
 
-export const movementStrategyMap: MovementStrategyMap = {
-  [PieceType.PAWN]: mergeMovementStrategies([pawnMovement, pawnCapture]),
+export const movementStrategyMap: MovementStrategyMap<Move> = {
+  [PieceType.PAWN]: mergeMovementStrategies<Move>([pawnMovement, pawnCapture]),
   [PieceType.ROOK]: linearMovement,
   [PieceType.KNIGHT]: knightMovement,
   [PieceType.BISHOP]: diagonalMovement,
-  [PieceType.KING]: mergeMovementStrategies([kingMovement, kingMovement, kingCastle]),
-  [PieceType.QUEEN]: mergeMovementStrategies([
-    diagonalMovement,
+  [PieceType.KING]: mergeMovementStrategies<Move>([kingMovement, kingCastle]),
+  [PieceType.QUEEN]: mergeMovementStrategies<Move>([
     linearMovement,
+    diagonalMovement,
   ]),
 };
+
+export const attackZoneStrategyMap: MovementStrategyMap<Position> = {
+  [PieceType.PAWN]: pawnAttackZone,
+  [PieceType.ROOK]: linearAttackZone,
+  [PieceType.KNIGHT]: knightAttackZone,
+  [PieceType.BISHOP]: diagonalAttackZone,
+  [PieceType.KING]: kingAttackZone,
+  [PieceType.QUEEN]: mergeMovementStrategies<Position>([
+    linearAttackZone,
+    diagonalAttackZone,
+  ]),
+}
