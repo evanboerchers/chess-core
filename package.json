@@ -1,11 +1,30 @@
 {
-  "name": "chess-engine",
+  "name": "@evanboerchers/chess-core",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.cjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:cjs": "esbuild src/chess.ts --bundle --platform=node --outfile=dist/index.cjs --sourcemap --format=cjs",
+    "build:esm": "esbuild src/chess.ts --bundle --platform=node --outfile=dist/index.mjs --sourcemap --format=esm",
+    "build:types": "tsc --emitDeclarationOnly && dts-bundle --name '@evanboerchers/chess-core' --main 'dist/types/index.d.ts' --out 'index.d.ts' --removeSource",
+    "build": "npm run build:types && npm run build:cjs && npm run build:esm",
+    "watch:cjs": "esbuild src/chess.ts --bundle --platform=node --outfile=dist/index.cjs --sourcemap --format=cjs --watch",
+    "watch:esm": "esbuild src/chess.ts --bundle --platform=node --outfile=dist/index.mjs --sourcemap --format=esm --watch",
+    "watch": "npm run watch:cjs & npm run watch:esm",
+    "clean": "rm -r -f dist"
   },
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "dts-bundle": "^0.7.3",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3"
+  }
 }

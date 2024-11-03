@@ -1,13 +1,11 @@
 import {
-  Board,
   GameState,
   Move,
-  Piece,
   PieceColour,
   PieceType,
   Position,
 } from "./chess.types";
-import { AttackZoneStrategy, MovementStrategy, MovementStrategyMap } from "./movement.types";
+import { MovementStrategy, MovementStrategyMap } from "./movement.types";
 
 const mergeMovementStrategies = <T>(
   strategies: MovementStrategy<T>[],
@@ -230,7 +228,7 @@ const knightMovement: MovementStrategy<Move> = (
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
       const target = board[newRow][newCol];
       if (target) {
-        if (target.colour !== current.colour) {
+      if (target.colour !== current.colour) {
           moves.push({
             piece: current,
             from: { row: row, col: col },

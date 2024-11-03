@@ -19,6 +19,13 @@ export const getBoardSquare = (gameState: GameState, position: Position): BoardS
 
 export const findPiece = (gameState: GameState, piece: Piece): Position[] => {
     const positions: Position[] = []
+    gameState.board.forEach((row,i) => {
+        row.forEach((piece, j) => {
+            if (piece) {
+                
+            }
+        })
+    })
     return positions
 }
 
