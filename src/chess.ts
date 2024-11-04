@@ -34,7 +34,7 @@ export const getAttackZones = (gameState: GameState, colour: PieceColour): Posit
     const positions: Position[] = [];
     gameState.board.forEach((row, i) => {
         row.forEach((piece, j) => {
-            if (piece && piece.colour == colour) {
+            if (piece && piece.colour === colour) {
                 positions.concat(getAttackZone(gameState, {row: i, col: j}));
             }
         })
@@ -42,10 +42,23 @@ export const getAttackZones = (gameState: GameState, colour: PieceColour): Posit
     return positions
 }
 
-export const getPotentialMoves = (gameState: GameState, position: Position): Move[] => {
+export const getPotentialLegalMoves = (gameState: GameState, position: Position): Move[] => {
     const piece = getBoardSquare(gameState, position)
     if (!piece) return [];
-    return movementStrategyMap[piece.type](gameState, position)    
+    const moves =  movementStrategyMap[piece.type](gameState, position)    
+    return moves.filter(move => isMoveLegal(gameState, move))
+}
+
+export const getAllPotentialLegalMoves = (gameState: GameState, colour: PieceColour): Move[] => {
+    const moves: Move[] = []
+    gameState.board.forEach((row, i) => {
+        row.forEach((piece, j) => {
+            if (piece && piece.colour === colour){
+                moves.concat(getPotentialLegalMoves(gameState, {row: i, col: j}))
+            }
+        })
+    })
+    return moves;
 }
 
 export const getAttackZone = (gameState: GameState, position: Position): Position[] => {
@@ -58,6 +71,17 @@ export const isKingInCheck = (gameState: GameState, colour: PieceColour): boolea
     const kingPosition = findPiece(gameState, { type: PieceType.KING, colour})[0]
     const attackPositions = getAttackZones(gameState, colour)
     return attackPositions.some((position) => (position.row === kingPosition.row && position.col === kingPosition.col))
+}
+
+export const isKingInCheckmate = (gameState: GameState, colour: PieceColour): boolean => {
+    if (!isKingInCheck(gameState, colour)) {
+        return false
+    }
+    const moves = getAllPotentialLegalMoves(gameState, colour)
+    if (moves.length > 0) {
+        return false
+    }
+    return true
 }
 
 export const makeMove = (gameState: GameState, move: Move): GameState => {

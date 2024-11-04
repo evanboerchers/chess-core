@@ -1,1 +1,1 @@
- import * as chess from './chess'
+export * from "./chess"
