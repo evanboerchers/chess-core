@@ -40,6 +40,12 @@ export interface ColourState {
   queenSide: boolean;
 }
 
+export enum GameOutcome {
+  WHITE = PieceColour.WHITE,
+  BLACK = PieceColour.BLACK,
+  DRAW = "draw"
+}
+
 export interface GameState {
   board: Board;
   currentTurn: PieceColour;
@@ -47,5 +53,5 @@ export interface GameState {
     [PieceColour.WHITE]: ColourState
     [PieceColour.BLACK]: ColourState
   };
-  history: Move[];
+  moveHistory: Move[];
 }

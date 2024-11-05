@@ -188,5 +188,5 @@
             "queenSide": true
         }
     },
-    "history": []
+    "moveHistory": []
 }

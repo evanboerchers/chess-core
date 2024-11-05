@@ -1,4 +1,4 @@
-import { BoardSquare, GameState, Move, Piece, PieceColour, PieceType, Position } from "./chess.types"
+import { BoardSquare, GameOutcome, GameState, Move, Piece, PieceColour, PieceType, Position } from "./chess.types"
 import { attackZoneStrategyMap, movementStrategyMap } from "./movement"
 
 export const copyGameState = (gameState: GameState): GameState => {
@@ -9,7 +9,7 @@ export const copyGameState = (gameState: GameState): GameState => {
         [PieceColour.WHITE]: { ...gameState.castlePrivileges[PieceColour.WHITE] },
         [PieceColour.BLACK]: { ...gameState.castlePrivileges[PieceColour.BLACK] }
       },
-      history: [...gameState.history]                 
+      moveHistory: [...gameState.moveHistory]                 
     };
   };
 
@@ -27,6 +27,11 @@ export const findPiece = (gameState: GameState, piece: Piece): Position[] => {
         })
     })
     return positions
+}
+
+export const changeTurn = (gameState: GameState): GameState => {
+    gameState.currentTurn = gameState.currentTurn === PieceColour.WHITE ? PieceColour.BLACK : PieceColour.WHITE  
+    return gameState
 }
 
 
@@ -84,6 +89,19 @@ export const isKingInCheckmate = (gameState: GameState, colour: PieceColour): bo
     return true
 }
 
+export const getGameOutcome = (gameState: GameState): GameOutcome | null => {
+    if(isKingInCheckmate(gameState, PieceColour.BLACK)) {
+        return GameOutcome.WHITE
+    }
+    if(isKingInCheckmate(gameState, PieceColour.WHITE)) {
+        return GameOutcome.BLACK
+    }
+    if(getAllPotentialLegalMoves(gameState, gameState.currentTurn)) {
+        return GameOutcome.DRAW
+    }
+    return null
+}
+
 export const makeMove = (gameState: GameState, move: Move): GameState => {
     if(!isMoveLegal(gameState, move)){
         return gameState;
@@ -96,17 +114,21 @@ export const makeMove = (gameState: GameState, move: Move): GameState => {
         return castle(gameState, move)
     }
     gameState.board[move.to.row][move.to.col] = move.promotionType || piece 
-    return gameState;
+    return changeTurn(gameState);
 }
 
 export const castle = (gameState: GameState, move: Move): GameState => {
     if (!move.castle) {
         throw Error("Not a castle move")
     }
-    return gameState;  
+    return changeTurn(gameState)
+      
 }
 
 export const isMoveLegal = (gameState: GameState, move: Move): boolean => {
+    if (gameState.currentTurn !== move.piece.colour) {
+        return false
+    }
   const futureGameState = makeMove(copyGameState(gameState), move);
   return !isKingInCheck(futureGameState, move.piece.colour);
 } 
