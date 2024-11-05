@@ -1,1 +1,1 @@
-export * from "./ChessGame"
+export {default as ChessGame} from "./ChessGame"
