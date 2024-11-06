@@ -1,0 +1,3 @@
+describe("ChessGame class tests", () => {
+    
+})
