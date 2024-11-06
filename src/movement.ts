@@ -7,7 +7,7 @@ import {
 } from "./chess.types";
 import { MovementStrategy, MovementStrategyMap } from "./movement.types";
 
-const mergeMovementStrategies = <T>(
+export const mergeMovementStrategies = <T>(
   strategies: MovementStrategy<T>[],
 ): MovementStrategy<T> => {
   return (position, board) => {
@@ -21,7 +21,7 @@ const mergeMovementStrategies = <T>(
   };
 };
 
-const diagonalMovement: MovementStrategy<Move> = (
+export const diagonalMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -71,7 +71,7 @@ const diagonalMovement: MovementStrategy<Move> = (
   return moves;
 };
 
-const diagonalAttackZone: MovementStrategy<Position> = (
+export const diagonalAttackZone: MovementStrategy<Position> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -112,7 +112,7 @@ const diagonalAttackZone: MovementStrategy<Position> = (
   return positions;
 };
 
-const linearMovement: MovementStrategy<Move> = (
+export const linearMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -161,7 +161,7 @@ const linearMovement: MovementStrategy<Move> = (
   return moves;
 };
 
-const linearAttackZone: MovementStrategy<Position> = (
+export const linearAttackZone: MovementStrategy<Position> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -199,7 +199,7 @@ const linearAttackZone: MovementStrategy<Position> = (
   return positions;
 };
 
-const knightMovement: MovementStrategy<Move> = (
+export const knightMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -249,7 +249,7 @@ const knightMovement: MovementStrategy<Move> = (
   return moves;
 };
 
-const knightAttackZone: MovementStrategy<Position> = (
+export const knightAttackZone: MovementStrategy<Position> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -283,7 +283,7 @@ const knightAttackZone: MovementStrategy<Position> = (
   return positions;
 };
 
-const pawnMovement: MovementStrategy<Move> = (
+export const pawnMovement: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -323,7 +323,7 @@ const pawnMovement: MovementStrategy<Move> = (
   return moves;
 };
 
-const pawnCapture: MovementStrategy<Move> = (
+export const pawnCapture: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -360,7 +360,7 @@ const pawnCapture: MovementStrategy<Move> = (
   return moves;
 };
 
-const pawnAttackZone: MovementStrategy<Position> = (
+export const pawnAttackZone: MovementStrategy<Position> = (
   gameState: GameState,
   position: Position
 ) => {
@@ -394,7 +394,7 @@ const pawnAttackZone: MovementStrategy<Position> = (
   return positions;
 }
 
-const kingMovement: MovementStrategy<Move> = (
+export const kingMovement: MovementStrategy<Move> = (
   gameState: GameState,
   coordingate: Position,
 ) => {
@@ -442,7 +442,7 @@ const kingMovement: MovementStrategy<Move> = (
   return moves;
 };
 
-const kingAttackZone: MovementStrategy<Position> = (
+export const kingAttackZone: MovementStrategy<Position> = (
   gameState: GameState,
   coordingate: Position,
 ) => {
@@ -474,7 +474,7 @@ const kingAttackZone: MovementStrategy<Position> = (
   return positions;
 };
 
-const kingCastle: MovementStrategy<Move> = (
+export const kingCastle: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
@@ -482,21 +482,20 @@ const kingCastle: MovementStrategy<Move> = (
   const { row, col } = position;
   const current = board[row][col];
   const moves: Move[] = [];
-  const kingHasMoved = false;
-  const kingSideRookHasMoved = false;
-  const queenSideRookHasMoved = false;
 
   if (!current) return [];
 
   const direction = current.colour === PieceColour.WHITE ? 1 : -1;
 
-  const kingSideCastle = board[row][7];
-  const queenSideCastle = board[row][0];
+  const kingSideRook = board[row][7];
+  const queenSideRook = board[row][0];
+
+  const kingPriviledge = gameState.castlePrivileges[current.colour].kingSide
+  const queenPriviledge = gameState.castlePrivileges[current.colour].queenSide
 
   if (
-    kingSideCastle &&
-    !kingHasMoved &&
-    !kingSideRookHasMoved &&
+    kingSideRook &&
+    kingPriviledge &&
     !board[row][5] &&
     !board[row][6]
   ) {
@@ -509,9 +508,8 @@ const kingCastle: MovementStrategy<Move> = (
   }
 
   if (
-    queenSideCastle &&
-    !kingHasMoved &&
-    !queenSideRookHasMoved &&
+    queenSideRook &&
+    queenPriviledge &&
     !board[row][1] &&
     !board[row][2] &&
     !board[row][3]
