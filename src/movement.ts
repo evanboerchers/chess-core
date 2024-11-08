@@ -299,11 +299,24 @@ export const pawnMovement: MovementStrategy<Move> = (
   let newRow = row + direction;
   const target = board[newRow][col];
   if (newRow >= 0 && newRow < 8 && !target) {
-    moves.push({
+    const move: Move = {
       piece: current,
       from: { row: row, col: col },
       to: { row: newRow, col: col },
-    });
+    }
+    if (current.colour === PieceColour.WHITE && newRow === 0) {
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.BISHOP}})
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.KNIGHT}})
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.ROOK}})
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.QUEEN}})
+    } else if (current.colour === PieceColour.BLACK && newRow === 7) {
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.BISHOP}})
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.KNIGHT}})
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.ROOK}})
+      moves.push({...move, promotionType: {colour: current.colour, type: PieceType.QUEEN}})
+    } else {
+      moves.push(move);
+    }
   }
 
   if (
@@ -356,9 +369,16 @@ export const pawnCapture: MovementStrategy<Move> = (
       }
     }
   });
-
   return moves;
 };
+
+export const pawnEnPassant: MovementStrategy<Move> = (
+  gameState: GameState,
+  position: Position,
+) => {
+  const moves: Move[] = []
+  return moves
+}
 
 export const pawnAttackZone: MovementStrategy<Position> = (
   gameState: GameState,
