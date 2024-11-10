@@ -1,12 +1,12 @@
 import { GameState, Move, PieceColour, PieceType, Position } from './chess.types'
-import {diagonalAttackZone, diagonalMovement, kingAttackZone, kingMovement, knightAttackZone, knightMovement, linearAttackZone, linearMovement, pawnAttackZone, pawnCapture, pawnEnPassant, pawnMovement} from './movement'
+import {diagonalAttackZone, diagonalMovement, kingAttackZone, kingCastle, kingMovement, knightAttackZone, knightMovement, linearAttackZone, linearMovement, pawnAttackZone, pawnCapture, pawnEnPassant, pawnMovement} from './movement'
 import { initial } from './data/gameState'
 
 describe("movement tests", () => {
     describe("diagonal", () => {
         describe("diagonalMovement", () => {
             test("should give all moves on lines", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -40,7 +40,7 @@ describe("movement tests", () => {
             })
     
             test("should give piece captures on lines ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -70,7 +70,7 @@ describe("movement tests", () => {
             })
     
             test("should give moves until blocked by own pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -96,7 +96,7 @@ describe("movement tests", () => {
         })
         describe("diagonalAttackZone", () => {
             test("should give all positions on lines", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -130,7 +130,7 @@ describe("movement tests", () => {
             })
     
             test("should give position on lines up to and including captures", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -160,7 +160,7 @@ describe("movement tests", () => {
             })
     
             test("should give moves on lines up to and including guarded pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -192,7 +192,7 @@ describe("movement tests", () => {
     describe("linear", () => {
         describe("linearMovement", () => {
             test("should give all moves on lines", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -227,7 +227,7 @@ describe("movement tests", () => {
             })
     
             test("should give piece captures on lines ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -257,7 +257,7 @@ describe("movement tests", () => {
             })
     
             test("should give moves until blocked by own pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -283,7 +283,7 @@ describe("movement tests", () => {
         })
         describe("linearAttackZone", () => {
             test("should give all positions on lines", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -318,7 +318,7 @@ describe("movement tests", () => {
             })
     
             test("should give piece position upto an including opponent pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -348,7 +348,7 @@ describe("movement tests", () => {
             })
     
             test("should give moves until blocked by own pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -380,7 +380,7 @@ describe("movement tests", () => {
     describe("knight", () => {
         describe("knightMovement", () => {
             test("should give all moves", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -409,7 +409,7 @@ describe("movement tests", () => {
             })
     
             test("should give all piece captures ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -439,7 +439,7 @@ describe("movement tests", () => {
             })
     
             test("should give moves until blocked by own pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -461,7 +461,7 @@ describe("movement tests", () => {
         })
         describe("kinghtAttackZone", () => {
             test("should give all positions", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -490,7 +490,7 @@ describe("movement tests", () => {
             })
 
             test("should give all positions including those with opponent pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -520,7 +520,7 @@ describe("movement tests", () => {
             })
     
             test("should give moves until blocked by own pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -552,7 +552,7 @@ describe("movement tests", () => {
     describe("pawn", () => {
         describe("pawnMovement", () => {
             test("should give a white forward move up the board", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -573,7 +573,7 @@ describe("movement tests", () => {
                 expect(actual).toEqual(expect.arrayContaining(expected));
             })
             test("should give a white starting double forward move up the board", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -596,7 +596,7 @@ describe("movement tests", () => {
             })
 
             test("should give a black forward move down the board", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -618,7 +618,7 @@ describe("movement tests", () => {
             })
 
             test("should give a black starting double forward move up the board", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -641,7 +641,7 @@ describe("movement tests", () => {
             })
 
             test("should be blocked by friendly piece", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -661,7 +661,7 @@ describe("movement tests", () => {
             })
 
             test("should be blocked by opponent piece", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -682,7 +682,7 @@ describe("movement tests", () => {
             })
 
             test("should have white promotions", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -707,7 +707,7 @@ describe("movement tests", () => {
             })
 
             test("should have black promotions", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -735,7 +735,7 @@ describe("movement tests", () => {
 
         describe("pawnCapture", () => {
             test("should give no captures", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -755,7 +755,7 @@ describe("movement tests", () => {
             })
 
             test("should not capture own pieces", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -775,7 +775,7 @@ describe("movement tests", () => {
             })
 
             test("should capture black opponent pieces", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -799,7 +799,7 @@ describe("movement tests", () => {
             })
 
             test("should capture white opponent pieces", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
@@ -823,7 +823,7 @@ describe("movement tests", () => {
             })
 
             test("should capture black and promote white", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -853,7 +853,7 @@ describe("movement tests", () => {
             })
 
             test("should capture white and promote black", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
@@ -885,7 +885,7 @@ describe("movement tests", () => {
 
         describe("pawnEnPassant", () => {
             test("should have no captures", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -906,7 +906,7 @@ describe("movement tests", () => {
             })
 
             test("should have no captures because not last move", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -931,7 +931,7 @@ describe("movement tests", () => {
             })
 
             test("should not have capture because freindly move", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -955,7 +955,7 @@ describe("movement tests", () => {
 
 
             test("should have en passant capture ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -981,7 +981,7 @@ describe("movement tests", () => {
             })
 
             test("should give left en passant capture ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -1007,7 +1007,7 @@ describe("movement tests", () => {
             })
 
             test("should give right en passant capture ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
@@ -1033,7 +1033,7 @@ describe("movement tests", () => {
             })
 
             test("should have black left en passant capture ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
@@ -1059,7 +1059,7 @@ describe("movement tests", () => {
             })
 
             test("should have black right en passant capture ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
@@ -1087,7 +1087,7 @@ describe("movement tests", () => {
 
         describe("pawnAttackZone", () => {
             test("should give all white positions", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1110,7 +1110,7 @@ describe("movement tests", () => {
             })
 
             test("should give all black positions", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1133,7 +1133,7 @@ describe("movement tests", () => {
             })
 
             test("should give all white positions including those with opponent pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -1157,7 +1157,7 @@ describe("movement tests", () => {
             })
     
             test("should give all black positions including those with opponent pieces ", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1183,7 +1183,7 @@ describe("movement tests", () => {
     describe("king", () => {
         describe("kingMovement", () => {
             test("should have moves", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1212,7 +1212,7 @@ describe("movement tests", () => {
             })
 
             test("should have no moves from blocking", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1232,7 +1232,7 @@ describe("movement tests", () => {
             })
 
             test("should have no moves from blocking", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -1264,7 +1264,7 @@ describe("movement tests", () => {
 
         describe("kingAttackZone", () => {
             test("should have all positions", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1293,7 +1293,7 @@ describe("movement tests", () => {
             })
 
             test("should have no moves from blocking", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
                 gameState.board = [
                     [null, null, null, null, null, null, null, null  ],
@@ -1322,7 +1322,7 @@ describe("movement tests", () => {
             })
 
             test("should have no moves from blocking", () => {
-                const gameState: GameState = initial
+                const gameState: GameState = initial()
                 const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
                 gameState.board = [
@@ -1353,7 +1353,144 @@ describe("movement tests", () => {
         })
 
         describe("kingCastle", () => {
-            it("")
+            it("should have white castle both king and queen side", () => {
+                const gameState: GameState = initial()
+                const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null , null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [rook, null, null, null, king, null, null, rook  ],
+                ]
+                const position = {row: 7, col: 4}
+                const expected: Move[] = [
+                    { piece: king, from: position, to: { row: 7, col: 2 }, castle: true },
+                    { piece: king, from: position, to: { row: 7, col: 6 }, castle: true },
+                ] 
+                const actual: Move[] = kingCastle(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            it("should have black castle both king and queen side", () => {
+                const gameState: GameState = initial()
+                const king = {colour: PieceColour.BLACK, type: PieceType.KING}
+                const rook = {colour: PieceColour.BLACK, type: PieceType.ROOK}
+                gameState.board = [
+                    [rook, null, null, null, king, null, null, rook  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null , null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 0, col: 4}
+                const expected: Move[] = [
+                    { piece: king, from: position, to: { row: 0, col: 2 }, castle: true },
+                    { piece: king, from: position, to: { row: 0, col: 6 }, castle: true },
+                ] 
+                const actual: Move[] = kingCastle(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            it("should have no moves since rook different colour", () => {
+                const gameState: GameState = initial()
+                const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const rook = {colour: PieceColour.BLACK, type: PieceType.ROOK}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null , null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [rook, null, null, null, king, null, null, rook  ],
+                ]
+                const position = {row: 7, col: 4}
+                const expected: Move[] = [] 
+                const actual: Move[] = kingCastle(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            it("should have no moves castles blocked", () => {
+                const gameState: GameState = initial()
+                const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+                const knight = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null , null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [rook, knight, null, null, king, null, knight, rook  ],
+                ]
+                const position = {row: 7, col: 4}
+                const expected: Move[] = [] 
+                const actual: Move[] = kingCastle(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            it("should have no kingside castle since no priviledge", () => {
+                const gameState: GameState = initial()
+                const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null , null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [rook, null, null, null, king, null, null, rook  ],
+                ]
+                gameState.castlePrivileges[PieceColour.WHITE].kingSide = false
+                const position = {row: 7, col: 4}
+                const expected: Move[] = [
+                    { piece: king, from: position, to: { row: 7, col: 2 }, castle: true },
+                ] 
+                const actual: Move[] = kingCastle(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            it("should have no queenside castle since no priviledge", () => {
+                const gameState: GameState = initial()
+                const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null , null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [rook, null, null, null, king, null, null, rook  ],
+                ]
+                gameState.castlePrivileges[PieceColour.WHITE].queenSide = false
+                const position = {row: 7, col: 4}
+                const expected: Move[] = [
+                    { piece: king, from: position, to: { row: 7, col: 6}, castle: true },
+                ] 
+                const actual: Move[] = kingCastle(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
         })
     })
 })

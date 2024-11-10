@@ -11,7 +11,7 @@ export const copyGameState = (gameState: GameState): GameState => {
       },
       moveHistory: [...gameState.moveHistory]                 
     };
-  };
+};
 
 export const getBoardSquare = (gameState: GameState, position: Position): BoardSquare => {
     return gameState.board[position.row][position.row]

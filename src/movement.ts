@@ -537,8 +537,6 @@ export const kingCastle: MovementStrategy<Move> = (
 
   if (!current) return [];
 
-  const direction = current.colour === PieceColour.WHITE ? 1 : -1;
-
   const kingSideRook = board[row][7];
   const queenSideRook = board[row][0];
 
@@ -547,6 +545,7 @@ export const kingCastle: MovementStrategy<Move> = (
 
   if (
     kingSideRook &&
+    current.colour === kingSideRook.colour &&
     kingPriviledge &&
     !board[row][5] &&
     !board[row][6]
@@ -561,6 +560,7 @@ export const kingCastle: MovementStrategy<Move> = (
 
   if (
     queenSideRook &&
+    current.colour === queenSideRook.colour &&
     queenPriviledge &&
     !board[row][1] &&
     !board[row][2] &&
