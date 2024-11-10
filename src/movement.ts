@@ -359,13 +359,26 @@ export const pawnCapture: MovementStrategy<Move> = (
     const newCol = col + direction.col;
     const target = board[newRow][newCol];
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-      if (target && target.colour !== target.colour) {
-        moves.push({
+      if (target && target.colour !== current.colour) {
+        const move: Move = {
           piece: current,
           from: { row: row, col: col },
           to: { row: newRow, col: newCol },
           capturedPiece: target,
-        });
+        }
+        if (current.colour === PieceColour.WHITE && newRow === 0) {
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.BISHOP}})
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.KNIGHT}})
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.ROOK}})
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.QUEEN}})
+        } else if (current.colour === PieceColour.BLACK && newRow === 7) {
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.BISHOP}})
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.KNIGHT}})
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.ROOK}})
+          moves.push({...move, promotionType: {colour: current.colour, type: PieceType.QUEEN}})
+        } else {
+          moves.push(move);
+        }
       }
     }
   });
@@ -376,7 +389,26 @@ export const pawnEnPassant: MovementStrategy<Move> = (
   gameState: GameState,
   position: Position,
 ) => {
+  const board = gameState.board
+  const { row, col } = position;
+  const current = board[row][col]
   const moves: Move[] = []
+  const lastMove = gameState.moveHistory.at(-1)
+  if (!lastMove) {
+    return moves;
+  }
+  const isOppPawn = lastMove.piece.colour !== current.colour && lastMove.piece.type === PieceType.PAWN 
+  const isDoubleStartMove = lastMove.from.row === (lastMove.piece.colour === PieceColour.WHITE ? 6 : 1 ) &&
+  lastMove.to.row  === (lastMove.piece.colour === PieceColour.WHITE ? 4 : 3 )
+  const isAdjacent = lastMove.to.row === row && (lastMove.to.col + 1 === col || lastMove.to.col - 1 === col)
+  if (isOppPawn && isDoubleStartMove && isAdjacent) {
+    moves.push({
+      piece: current,
+      from: position,
+      to: { row: row + (current.colour === PieceColour.WHITE ? -1 : 1), col: lastMove.to.col},
+      capturedPiece: lastMove.piece
+    })
+  }
   return moves
 }
 
@@ -442,7 +474,7 @@ export const kingMovement: MovementStrategy<Move> = (
     const target = board[newRow][newCol];
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
       if (target) {
-        if (target.colour !== target.colour) {
+        if (target.colour !== current.colour) {
           moves.push({
             piece: current,
             from: { row: row, col: col },

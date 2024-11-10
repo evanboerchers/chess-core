@@ -1,5 +1,5 @@
 import { GameState, Move, PieceColour, PieceType, Position } from './chess.types'
-import {diagonalAttackZone, diagonalMovement, kingMovement, knightAttackZone, knightMovement, linearAttackZone, linearMovement, pawnAttackZone, pawnCapture, pawnMovement} from './movement'
+import {diagonalAttackZone, diagonalMovement, kingAttackZone, kingMovement, knightAttackZone, knightMovement, linearAttackZone, linearMovement, pawnAttackZone, pawnCapture, pawnEnPassant, pawnMovement} from './movement'
 import { initial } from './data/gameState'
 
 describe("movement tests", () => {
@@ -754,7 +754,7 @@ describe("movement tests", () => {
                 expect(actual).toEqual(expect.arrayContaining(expected));
             })
 
-            test("should no captures on own pieces", () => {
+            test("should not capture own pieces", () => {
                 const gameState: GameState = initial
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 gameState.board = [
@@ -774,7 +774,7 @@ describe("movement tests", () => {
                 expect(actual).toEqual(expect.arrayContaining(expected));
             })
 
-            test("should capture opponent pieces", () => {
+            test("should capture black opponent pieces", () => {
                 const gameState: GameState = initial
                 const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
                 const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
@@ -784,7 +784,7 @@ describe("movement tests", () => {
                     [null, null, null, null, null, null, null, null  ],
                     [null, null, null, oppPiece, oppPiece, oppPiece, null, null  ],
                     [null, null, null, null, piece, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, null, oppPiece, null, null  ],
                     [null, null, null, null, null, null, null, null  ],
                     [null, null, null, null, null, null, null, null  ],
                 ]
@@ -798,13 +798,291 @@ describe("movement tests", () => {
                 expect(actual).toEqual(expect.arrayContaining(expected));
             })
 
-            test("should capture and propomote", () => {
-                
+            test("should capture white opponent pieces", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, null, oppPiece, null, null  ],
+                    [null, null, null, null, piece, null, null, null  ],
+                    [null, null, null, oppPiece, oppPiece, oppPiece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 5, col: 5 }, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 5, col: 3 }, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = pawnCapture(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should capture black and promote white", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, oppPiece, null, oppPiece, null, null  ],
+                    [null, null, null, null, piece, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 1, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 0, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.QUEEN} },
+                    { piece, from: position, to: { row: 0, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.ROOK} },
+                    { piece, from: position, to: { row: 0, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.BISHOP} },
+                    { piece, from: position, to: { row: 0, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.KNIGHT} },
+                    { piece, from: position, to: { row: 0, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.QUEEN} },
+                    { piece, from: position, to: { row: 0, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.ROOK} },
+                    { piece, from: position, to: { row: 0, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.BISHOP} },
+                    { piece, from: position, to: { row: 0, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.KNIGHT} },
+                ] 
+                const actual: Move[] = pawnCapture(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should capture white and promote black", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, piece, null, null, null  ],
+                    [null, null, null, oppPiece, null, oppPiece, null, null  ],
+                ]
+                const position = {row: 6, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 7, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.QUEEN} },
+                    { piece, from: position, to: { row: 7, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.ROOK} },
+                    { piece, from: position, to: { row: 7, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.BISHOP} },
+                    { piece, from: position, to: { row: 7, col: 5 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.KNIGHT} },
+                    { piece, from: position, to: { row: 7, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.QUEEN} },
+                    { piece, from: position, to: { row: 7, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.ROOK} },
+                    { piece, from: position, to: { row: 7, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.BISHOP} },
+                    { piece, from: position, to: { row: 7, col: 3 }, capturedPiece: oppPiece, promotionType: {colour: piece.colour, type: PieceType.KNIGHT} },
+                ] 
+                const actual: Move[] = pawnCapture(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
             })
         })
 
         describe("pawnEnPassant", () => {
+            test("should have no captures", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, piece, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 3, col: 4}
+                const expected: Move[] = [
+                ] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
 
+            test("should have no captures because not last move", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, piece, null, null, null  ],
+                    [null, null, null, null, null, null, piece, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: oppPiece, from: {row: 1, col: 3}, to: {row: 3, col: 3}},
+                    {piece: piece, from: {row: 6, col: 6}, to: {row: 4, col: 6}}
+                ]
+                const position = {row: 3, col: 4}
+                const expected: Move[] = [] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should not have capture because freindly move", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null  ],
+                    [null, null, null, piece, piece, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: piece, from: {row: 6, col: 3}, to: {row: 4, col: 3}}
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+
+            test("should have en passant capture ", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, piece, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: oppPiece, from: {row: 1, col: 3}, to: {row: 3, col: 3}}
+                ]
+                const position = {row: 3, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 2, col: 3 }, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should give left en passant capture ", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, piece, oppPiece, null, null ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: oppPiece, from: {row: 1, col: 3}, to: {row: 3, col: 3}}
+                ]
+                const position = {row: 3, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 2, col: 3 }, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should give right en passant capture ", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, piece, oppPiece, null, null ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: oppPiece, from: {row: 1, col: 5}, to: {row: 3, col: 5}}
+                ]
+                const position = {row: 3, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 2, col: 5 }, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should have black left en passant capture ", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, piece, oppPiece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: oppPiece, from: {row: 6, col: 3}, to: {row: 4, col: 3}}
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 5, col: 3 }, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should have black right en passant capture ", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.BLACK, type: PieceType.PAWN}
+                const oppPiece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, piece, oppPiece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                gameState.moveHistory = [
+                    {piece: oppPiece, from: {row: 6, col: 5}, to: {row: 4, col: 5}}
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 5, col: 5 }, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = pawnEnPassant(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
         }) 
 
         describe("pawnAttackZone", () => {
@@ -901,7 +1179,181 @@ describe("movement tests", () => {
                 expect(actual).toEqual(expect.arrayContaining(expected));
             })
         })    
-        
+    })
+    describe("king", () => {
+        describe("kingMovement", () => {
+            test("should have moves", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, piece, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 3, col: 3} },
+                    { piece, from: position, to: { row: 3, col: 4 } },
+                    { piece, from: position, to: { row: 3, col: 5 } },
+                    { piece, from: position, to: { row: 4, col: 3 } },
+                    { piece, from: position, to: { row: 4, col: 5} },
+                    { piece, from: position, to: { row: 5, col: 3 } },
+                    { piece, from: position, to: { row: 5, col: 4 } },
+                    { piece, from: position, to: { row: 5, col: 5 } },
+                ] 
+                const actual: Move[] = kingMovement(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
 
+            test("should have no moves from blocking", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, piece, piece, piece, null, null  ],
+                    [null, null, null, piece, piece, piece, null, null  ],
+                    [null, null, null, piece, piece, piece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [] 
+                const actual: Move[] = kingMovement(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should have no moves from blocking", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, oppPiece, oppPiece, null, null  ],
+                    [null, null, null, oppPiece, piece, oppPiece, null, null  ],
+                    [null, null, null, oppPiece, oppPiece, oppPiece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 3, col: 3}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 3, col: 4}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 3, col: 5}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 4, col: 3}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 4, col: 5}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 5, col: 3}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 5, col: 4}, capturedPiece: oppPiece },
+                    { piece, from: position, to: { row: 5, col: 5}, capturedPiece: oppPiece },
+                ] 
+                const actual: Move[] = kingMovement(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+        })
+
+        describe("kingAttackZone", () => {
+            test("should have all positions", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, piece, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Position[] = [
+                    { row: 3, col: 3 },
+                    { row: 3, col: 4 },
+                    { row: 3, col: 5 },
+                    { row: 4, col: 3 },
+                    { row: 4, col: 5 },
+                    { row: 5, col: 3 },
+                    { row: 5, col: 4 },
+                    { row: 5, col: 5 },
+                ] 
+                const actual: Position[] = kingAttackZone(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should have no moves from blocking", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, piece, piece, piece, null, null  ],
+                    [null, null, null, piece, piece, piece, null, null  ],
+                    [null, null, null, piece, piece, piece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Position[] = [
+                    { row: 3, col: 3 },
+                    { row: 3, col: 4 },
+                    { row: 3, col: 5 },
+                    { row: 4, col: 3 },
+                    { row: 4, col: 5 },
+                    { row: 5, col: 3 },
+                    { row: 5, col: 4 },
+                    { row: 5, col: 5 },
+                ] 
+                const actual: Position[] = kingAttackZone(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+
+            test("should have no moves from blocking", () => {
+                const gameState: GameState = initial
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                const oppPiece = {colour: PieceColour.BLACK, type: PieceType.KNIGHT}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, oppPiece, oppPiece, oppPiece, null, null  ],
+                    [null, null, null, oppPiece, piece, oppPiece, null, null  ],
+                    [null, null, null, oppPiece, oppPiece, oppPiece, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 4, col: 4}
+                const expected: Position[] = [
+                    { row: 3, col: 3 },
+                    { row: 3, col: 4 },
+                    { row: 3, col: 5 },
+                    { row: 4, col: 3 },
+                    { row: 4, col: 5 },
+                    { row: 5, col: 3 },
+                    { row: 5, col: 4 },
+                    { row: 5, col: 5 },
+                ]
+                const actual: Position[] = kingAttackZone(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
+        })
+
+        describe("kingCastle", () => {
+            it("")
+        })
     })
 })
