@@ -34,6 +34,11 @@ export const changeTurn = (gameState: GameState): GameState => {
     return gameState
 }
 
+export const getAttackZone = (gameState: GameState, position: Position): Position[] => {
+    const piece = getBoardSquare(gameState, position)
+    if (!piece) return [];
+    return attackZoneStrategyMap[piece.type](gameState, position)    
+}
 
 export const getAttackZones = (gameState: GameState, colour: PieceColour): Position[] => {
     const positions: Position[] = [];
@@ -46,6 +51,20 @@ export const getAttackZones = (gameState: GameState, colour: PieceColour): Posit
     })
     return positions
 }
+
+export const isKingInCheck = (gameState: GameState, colour: PieceColour): boolean => {
+    const kingPosition = findPiece(gameState, { type: PieceType.KING, colour})[0]
+    const attackPositions = getAttackZones(gameState, colour)
+    return attackPositions.some((position) => (position.row === kingPosition.row && position.col === kingPosition.col))
+}
+
+export const isMoveLegal = (gameState: GameState, move: Move): boolean => {
+    if (gameState.currentTurn !== move.piece.colour) {
+        return false
+    }
+  const futureGameState = makeMove(copyGameState(gameState), move);
+  return !isKingInCheck(futureGameState, move.piece.colour);
+} 
 
 export const getPotentialLegalMoves = (gameState: GameState, position: Position): Move[] => {
     const piece = getBoardSquare(gameState, position)
@@ -64,18 +83,6 @@ export const getAllPotentialLegalMoves = (gameState: GameState, colour: PieceCol
         })
     })
     return moves;
-}
-
-export const getAttackZone = (gameState: GameState, position: Position): Position[] => {
-    const piece = getBoardSquare(gameState, position)
-    if (!piece) return [];
-    return attackZoneStrategyMap[piece.type](gameState, position)    
-}
-
-export const isKingInCheck = (gameState: GameState, colour: PieceColour): boolean => {
-    const kingPosition = findPiece(gameState, { type: PieceType.KING, colour})[0]
-    const attackPositions = getAttackZones(gameState, colour)
-    return attackPositions.some((position) => (position.row === kingPosition.row && position.col === kingPosition.col))
 }
 
 export const isKingInCheckmate = (gameState: GameState, colour: PieceColour): boolean => {
@@ -124,12 +131,4 @@ export const castle = (gameState: GameState, move: Move): GameState => {
     return changeTurn(gameState)
       
 }
-
-export const isMoveLegal = (gameState: GameState, move: Move): boolean => {
-    if (gameState.currentTurn !== move.piece.colour) {
-        return false
-    }
-  const futureGameState = makeMove(copyGameState(gameState), move);
-  return !isKingInCheck(futureGameState, move.piece.colour);
-} 
   
