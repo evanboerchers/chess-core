@@ -20,9 +20,9 @@ export const getBoardSquare = (gameState: GameState, position: Position): BoardS
 export const findPiece = (gameState: GameState, piece: Piece): Position[] => {
     const positions: Position[] = []
     gameState.board.forEach((row,i) => {
-        row.forEach((piece, j) => {
-            if (piece) {
-                
+        row.forEach((current, j) => {
+            if (current && current.colour === piece.colour && current.type === piece.type ) {
+                positions.push({row: i, col: j})
             }
         })
     })
@@ -54,7 +54,8 @@ export const getAttackZones = (gameState: GameState, colour: PieceColour): Posit
 
 export const isKingInCheck = (gameState: GameState, colour: PieceColour): boolean => {
     const kingPosition = findPiece(gameState, { type: PieceType.KING, colour})[0]
-    const attackPositions = getAttackZones(gameState, colour)
+    const opponentColour = colour === PieceColour.WHITE ? PieceColour.BLACK : PieceColour.WHITE
+    const attackPositions = getAttackZones(gameState, opponentColour)
     return attackPositions.some((position) => (position.row === kingPosition.row && position.col === kingPosition.col))
 }
 

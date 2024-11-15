@@ -1,5 +1,5 @@
-import { copyGameState, getAttackZone } from "./chess"
-import { PieceColour } from "./chess.types"
+import { copyGameState, findPiece, getAttackZone, isKingInCheck } from "./chess"
+import { Piece, PieceColour, PieceType, Position } from "./chess.types"
 import { initial } from "./data/gameState"
 
 describe("chess tests", () => {
@@ -13,10 +13,147 @@ describe("chess tests", () => {
          })
     })
 
+    describe("findPiece", () => {
+        it("should return all white pawn positions", () => {
+            const gameState = initial();
+            const piece: Piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+            const expected: Position[] = [
+                {row: 6, col: 0},
+                {row: 6, col: 1},
+                {row: 6, col: 2},
+                {row: 6, col: 3},
+                {row: 6, col: 4},
+                {row: 6, col: 5},
+                {row: 6, col: 6},
+                {row: 6, col: 7},
+            ]
+            const actual = findPiece(gameState, piece)
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+        it("should return the black king position", () => {
+            const gameState = initial();
+            const piece: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const expected: Position[] = [
+                {row: 0, col: 4},
+            ]
+            const actual = findPiece(gameState, piece)
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+        it("should return nothing", () => {
+            const gameState = initial();
+            gameState.board[0][4] = null;
+            const piece: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const expected: Position[] = []
+            const actual = findPiece(gameState, piece)
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+    })
+
     describe("getAttackZone", () => {
         it("should get relevant attack zones for queen", () => {
-            const state = initial();
-            getAttackZone(state, )
+            const gameState = initial();
+            const piece = {colour: PieceColour.WHITE, type: PieceType.QUEEN}
+            gameState.board =  [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, piece, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const position = {row: 4, col: 4}
+            const expected: Position[] = [
+                { row: 3, col: 3 },
+                { row: 2, col: 2 },
+                { row: 1, col: 1 },
+                { row: 0, col: 0 },
+                { row: 5, col: 5 },
+                { row: 6, col: 6 },
+                { row: 7, col: 7 },
+                { row: 3, col: 5 },
+                { row: 2, col: 6 },
+                { row: 1, col: 7 },
+                { row: 5, col: 3 },
+                { row: 6, col: 2 },
+                { row: 7, col: 1 },
+                { row: 4, col: 0 },
+                { row: 4, col: 1 },
+                { row: 4, col: 2 },
+                { row: 4, col: 3 },
+                { row: 4, col: 5 },
+                { row: 4, col: 6 },
+                { row: 4, col: 7 },
+                { row: 0, col: 4 },
+                { row: 1, col: 4 },
+                { row: 2, col: 4 },
+                { row: 3, col: 4 },
+                { row: 5, col: 4 },
+                { row: 6, col: 4 },
+                { row: 7, col: 4 },
+            ] 
+            const actual = getAttackZone(gameState, position)
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+    })
+
+    describe("isKingInCheck", () => {
+        it("should not be in check on empty board", () => {
+            const gameState = initial();
+            const king = {colour: PieceColour.WHITE, type: PieceType.QUEEN}
+            gameState.board =  [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = isKingInCheck(gameState, PieceColour.WHITE)
+            expect(actual).toBe(false);
+        })
+        
+        it("should not be in check from own rook", () => {
+            const gameState = initial();
+            const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            gameState.board =  [
+                [null, null, null, null, rook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = isKingInCheck(gameState, PieceColour.WHITE)
+            expect(actual).toBe(false);
+        })
+
+        it.only("should not be in check from opponent rook", () => {
+            const gameState = initial();
+            const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const rook = {colour: PieceColour.BLACK, type: PieceType.ROOK}
+            gameState.board =  [
+                [null, null, null, null, rook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = isKingInCheck(gameState, PieceColour.WHITE)
+            expect(actual).toBe(true);
         })
     })
 })

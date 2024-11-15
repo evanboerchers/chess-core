@@ -5,7 +5,7 @@ import { initial } from "./data/gameState";
 export default class ChessGame {
     private _gameState: GameState 
 
-    constructor(initalState: GameState = initial ) {
+    constructor(initalState: GameState = initial() ) {
         this._gameState = initalState  
     }
 
