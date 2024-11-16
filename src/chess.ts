@@ -14,7 +14,7 @@ export const copyGameState = (gameState: GameState): GameState => {
 };
 
 export const getBoardSquare = (gameState: GameState, position: Position): BoardSquare => {
-    return gameState.board[position.row][position.row]
+    return gameState.board[position.row][position.col]
 }
 
 export const findPiece = (gameState: GameState, piece: Piece): Position[] => {
@@ -37,20 +37,27 @@ export const changeTurn = (gameState: GameState): GameState => {
 export const getAttackZone = (gameState: GameState, position: Position): Position[] => {
     const piece = getBoardSquare(gameState, position)
     if (!piece) return [];
-    return attackZoneStrategyMap[piece.type](gameState, position)    
+    const positions = attackZoneStrategyMap[piece.type](gameState, position)    
+    return positions
 }
 
 export const getAttackZones = (gameState: GameState, colour: PieceColour): Position[] => {
-    const positions: Position[] = [];
+    const positionsSet = new Set<string>(); // Use Set with a unique key for each position
     gameState.board.forEach((row, i) => {
         row.forEach((piece, j) => {
             if (piece && piece.colour === colour) {
-                positions.concat(getAttackZone(gameState, {row: i, col: j}));
+                const attackZones = getAttackZone(gameState, { row: i, col: j });
+                attackZones.forEach((pos) => {
+                    positionsSet.add(`${pos.row},${pos.col}`); // Add unique key to Set
+                });
             }
-        })
-    })
-    return positions
-}
+        });
+    });
+    return Array.from(positionsSet).map((key) => {
+        const [row, col] = key.split(',').map(Number);
+        return { row, col };
+    });
+};
 
 export const isKingInCheck = (gameState: GameState, colour: PieceColour): boolean => {
     const kingPosition = findPiece(gameState, { type: PieceType.KING, colour})[0]
