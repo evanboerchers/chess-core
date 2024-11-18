@@ -66,6 +66,38 @@ export const isKingInCheck = (gameState: GameState, colour: PieceColour): boolea
     return attackPositions.some((position) => (position.row === kingPosition.row && position.col === kingPosition.col))
 }
 
+export const makeMove = (gameState: GameState, move: Move): GameState => {
+    if (move.castle) { 
+        gameState = castle(gameState, move)
+        gameState = changeTurn(gameState)
+        gameState = addMoveToHistory(gameState, move)
+        return gameState
+    }
+    gameState = movePiece(gameState, move.from, move.to, move.promotionType)
+    gameState = changeTurn(gameState)
+    gameState = addMoveToHistory(gameState, move)
+    return gameState
+}
+
+export const movePiece = (gameState: GameState, from: Position, to: Position, promotionType?: Piece) => {
+    const piece =  getBoardSquare(gameState, from);
+    gameState.board[from.row][from.col] = null;
+    gameState.board[to.row][to.col] = piece || promotionType 
+    return gameState
+}
+
+export const castle = (gameState: GameState, move: Move): GameState => {
+    if (!move.castle) {
+        throw Error("Not a castle move")
+    }
+    return gameState
+}
+
+export const addMoveToHistory = (gameState: GameState, move: Move): GameState => {
+    gameState.moveHistory.push(move);
+    return gameState
+}
+  
 export const isMoveLegal = (gameState: GameState, move: Move): boolean => {
     if (gameState.currentTurn !== move.piece.colour) {
         return false
@@ -116,27 +148,3 @@ export const getGameOutcome = (gameState: GameState): GameOutcome | null => {
     }
     return null
 }
-
-export const makeMove = (gameState: GameState, move: Move): GameState => {
-    if(!isMoveLegal(gameState, move)){
-        return gameState;
-    }
-    const piece =  getBoardSquare(gameState, move.from);
-    if(!piece) {
-        return gameState
-    }
-    if (move.castle) { 
-        return castle(gameState, move)
-    }
-    gameState.board[move.to.row][move.to.col] = move.promotionType || piece 
-    return changeTurn(gameState);
-}
-
-export const castle = (gameState: GameState, move: Move): GameState => {
-    if (!move.castle) {
-        throw Error("Not a castle move")
-    }
-    return changeTurn(gameState)
-      
-}
-  
