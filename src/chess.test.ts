@@ -1,7 +1,6 @@
-import { copyGameState, findPiece, getAttackZone, getAttackZones, getBoardSquare, isKingInCheck, makeMove } from "./chess"
+import { copyGameState, findPiece, getAttackZone, getAttackZones, getBoardSquare, isKingInCheck, doesMoveCheckOwnKing, makeMove } from "./chess"
 import { Board, Move, Piece, PieceColour, PieceType, Position } from "./chess.types"
 import { initial } from "./data/gameState"
-import { areBoardsEqual } from "./utils/test"
 
 describe("chess tests", () => {
     describe("copyGameState", () => {
@@ -395,7 +394,7 @@ describe("chess tests", () => {
                 ]
             
             const actual = makeMove(gameState, move).board
-            expect(areBoardsEqual(expected, actual)).toBe(true)  
+            expect(expected).toEqual(actual) 
         })
 
         it("should capture pawn", () => {
@@ -432,7 +431,7 @@ describe("chess tests", () => {
                 ]
             
             const actual = makeMove(gameState, move).board
-            expect(areBoardsEqual(expected, actual)).toBe(true)  
+            expect(expected).toEqual(actual) 
         })
 
         it("should promote pawn", () => {
@@ -469,46 +468,205 @@ describe("chess tests", () => {
             ]
             
             const actual = makeMove(gameState, move).board
-            expect(areBoardsEqual(expected, actual)).toBe(true)  
+            expect(expected).toEqual(actual) 
         })
 
         it("should castle queen side", () => {
-            it("should promote pawn", () => {
-                const gameState = initial();
-                const king = {colour: PieceColour.WHITE, type: PieceType.KING}
-                const rook = {colour: PieceColour.WHITE, type: PieceType.PAWN}
-                const from: Position = {row: 7, col: 4}
-                const to: Position = {row: 7, col: 2}
-                const move: Move = {
-                    piece: king,
-                    from: from,
-                    to: to,
-                    castle: true
-                }
-                gameState.board = [
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [rook, null, null, null, king, null, null, rook  ],
-                ]
-                const expected: Board = [
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, null, null, null, null, null, null  ],
-                    [null, null, king, rook, null, null, null, rook  ],
-                ]
-                
-                const actual = makeMove(gameState, move).board
-                expect(areBoardsEqual(expected, actual)).toBe(true)  
-            })
+            const gameState = initial();
+            const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            const from: Position = {row: 7, col: 4}
+            const to: Position = {row: 7, col: 2}
+            const move: Move = {
+                piece: king,
+                from: from,
+                to: to,
+                castle: true
+            }
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [rook, null, null, null, king, null, null, rook  ],
+            ]
+            const expected: Board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, king, rook, null, null, null, rook  ],
+            ]
+            
+            const actual = makeMove(gameState, move).board
+            expect(expected).toEqual(actual)  
+        })
+
+        it("should castle king side", () => {
+            const gameState = initial();
+            const king = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const rook = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            const from: Position = {row: 7, col: 4}
+            const to: Position = {row: 7, col: 6}
+            const move: Move = {
+                piece: king,
+                from: from,
+                to: to,
+                castle: true
+            }
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [rook, null, null, null, king, null, null, rook  ],
+            ]
+            const expected: Board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [rook, null, null, null, null, rook, king, null  ],
+            ]
+            const actual = makeMove(gameState, move).board
+            expect(expected).toEqual(actual) 
+        })
+
+        it("should add move to history", () => {
+            const gameState = initial();
+            const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const from: Position = {row: 4, col: 4}
+            const to: Position = {row: 4, col: 5}
+            const move: Move = {
+                piece: piece,
+                from: from,
+                to: to,
+            }
+            gameState.moveHistory = [{
+                piece: piece,
+                from: {row: 5, col: 4},
+                to: {row:  4, col: 4},
+            }]
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, piece, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = [{
+                piece: piece,
+                from: {row: 5, col: 4},
+                to: {row:  4, col: 4},
+            },
+            move
+            ]
+            const expected = makeMove(gameState, move).moveHistory
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("should change turn", () => {
+            const gameState = initial();
+            const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const from: Position = {row: 4, col: 4}
+            const to: Position = {row: 4, col: 5}
+            const move: Move = {
+                piece: piece,
+                from: from,
+                to: to,
+            }
+            gameState.currentTurn = PieceColour.WHITE
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, piece, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const expected = PieceColour.BLACK
+            const actual = makeMove(gameState, move).currentTurn
+            expect(actual).toEqual(expected);
+        })
+    })
+
+    describe("doesMoveCheckOwnKing", () => {
+        it("should not modify gamestate", () => {
+            const gameState = initial();
+            const gameState2 = initial();
+            const move: Move = {
+                piece: {colour: PieceColour.WHITE, type: PieceType.PAWN},
+                to: {row: 0, col: 4},
+                from: {row: 0, col: 6},
+            }
+            doesMoveCheckOwnKing(gameState, move)
+            expect(gameState).toEqual(gameState2)
+        })
+
+        it("should not modify gamestate", () => {
+            const gameState = initial();
+            const gameState2 = initial();
+            const move: Move = {
+                piece: {colour: PieceColour.WHITE, type: PieceType.PAWN},
+                to: {row: 0, col: 4},
+                from: {row: 0, col: 6},
+            }
+            doesMoveCheckOwnKing(gameState, move)
+            expect(gameState).toEqual(gameState2)
+        })
+
+        it("should not modify gamestate", () => {
+            const gameState = initial();
+            const gameState2 = initial();
+            const move: Move = {
+                piece: {colour: PieceColour.WHITE, type: PieceType.PAWN},
+                to: {row: 0, col: 4},
+                from: {row: 0, col: 6},
+            }
+            doesMoveCheckOwnKing(gameState, move)
+            expect(gameState).toEqual(gameState2)
+        })
+
+        it("should be false, move doesnt change anything", () => {
+            const gameState = initial();
+            const gameState2 = initial();
+            const move: Move = {
+                piece: {colour: PieceColour.WHITE, type: PieceType.PAWN},
+                to: {row: 0, col: 4},
+                from: {row: 0, col: 6},
+            }
+            doesMoveCheckOwnKing(gameState, move)
+            expect(gameState).toEqual(gameState2)
+        })
+
+        it("should be true, move doesnt change anything", () => {
+            const gameState = initial();
+            const gameState2 = initial();
+            const move: Move = {
+                piece: {colour: PieceColour.WHITE, type: PieceType.PAWN},
+                to: {row: 0, col: 4},
+                from: {row: 0, col: 6},
+            }
+            doesMoveCheckOwnKing(gameState, move)
+            expect(gameState).toEqual(gameState2)
         })
     })
 })

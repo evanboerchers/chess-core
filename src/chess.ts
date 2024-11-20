@@ -90,6 +90,22 @@ export const castle = (gameState: GameState, move: Move): GameState => {
     if (!move.castle) {
         throw Error("Not a castle move")
     }
+    const king = move.piece
+    if (move.to.col === 2) {
+        const rookPosition = {row: move.from.row, col: 0}
+        const rook = getBoardSquare(gameState, rookPosition)
+        gameState.board[move.from.row][move.from.col] = null
+        gameState.board[move.to.row][move.to.col] = king
+        gameState.board[move.from.row][0] = null
+        gameState.board[move.to.row][3] = rook
+    } else if (move.to.col === 6) {
+        const rookPosition = {row: move.from.row, col: 7}
+        const rook = getBoardSquare(gameState, rookPosition)
+        gameState.board[move.from.row][move.from.col] = null
+        gameState.board[move.to.row][move.to.col] = king
+        gameState.board[move.from.row][7] = null
+        gameState.board[move.to.row][5] = rook
+    }
     return gameState
 }
 
@@ -98,19 +114,19 @@ export const addMoveToHistory = (gameState: GameState, move: Move): GameState =>
     return gameState
 }
   
-export const isMoveLegal = (gameState: GameState, move: Move): boolean => {
+export const doesMoveCheckOwnKing = (gameState: GameState, move: Move): boolean => {
     if (gameState.currentTurn !== move.piece.colour) {
         return false
     }
   const futureGameState = makeMove(copyGameState(gameState), move);
-  return !isKingInCheck(futureGameState, move.piece.colour);
+  return isKingInCheck(futureGameState, move.piece.colour);
 } 
 
 export const getPotentialLegalMoves = (gameState: GameState, position: Position): Move[] => {
     const piece = getBoardSquare(gameState, position)
     if (!piece) return [];
     const moves =  movementStrategyMap[piece.type](gameState, position)    
-    return moves.filter(move => isMoveLegal(gameState, move))
+    return moves.filter(move => !doesMoveCheckOwnKing(gameState, move))
 }
 
 export const getAllPotentialLegalMoves = (gameState: GameState, colour: PieceColour): Move[] => {
