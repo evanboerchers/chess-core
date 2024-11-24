@@ -130,11 +130,11 @@ export const getPotentialLegalMoves = (gameState: GameState, position: Position)
 }
 
 export const getAllPotentialLegalMoves = (gameState: GameState, colour: PieceColour): Move[] => {
-    const moves: Move[] = []
+    let moves: Move[] = []
     gameState.board.forEach((row, i) => {
         row.forEach((piece, j) => {
             if (piece && piece.colour === colour){
-                moves.concat(getPotentialLegalMoves(gameState, {row: i, col: j}))
+                moves = moves.concat(getPotentialLegalMoves(gameState, {row: i, col: j}))
             }
         })
     })

@@ -1260,6 +1260,30 @@ describe("movement tests", () => {
                 expect(actual).toHaveLength(expected.length);
                 expect(actual).toEqual(expect.arrayContaining(expected));
             })
+
+            test("should have no off board moves", () => {
+                const gameState: GameState = initial()
+                const piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+                gameState.board = [
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [null, null, null, null, null, null, null, null  ],
+                    [piece, null, null, null, null, null, null, null  ],
+                ]
+                const position = {row: 7, col: 0}
+                const expected: Move[] = [
+                    { piece, from: position, to: { row: 6, col: 0}},
+                    { piece, from: position, to: { row: 7, col: 1}},
+                    { piece, from: position, to: { row: 7, col: 1}},
+                ] 
+                const actual: Move[] = kingMovement(gameState, position)
+                expect(actual).toHaveLength(expected.length);
+                expect(actual).toEqual(expect.arrayContaining(expected));
+            })
         })
 
         describe("kingAttackZone", () => {

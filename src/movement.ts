@@ -471,8 +471,8 @@ export const kingMovement: MovementStrategy<Move> = (
   directions.forEach((direction) => {
     const newRow = row + direction.row;
     const newCol = col + direction.col;
-    const target = board[newRow][newCol];
     if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+      const target = board[newRow][newCol];
       if (target) {
         if (target.colour !== current.colour) {
           moves.push({

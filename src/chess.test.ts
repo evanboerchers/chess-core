@@ -1,4 +1,4 @@
-import { copyGameState, findPiece, getAttackZone, getAttackZones, getBoardSquare, isKingInCheck, doesMoveCheckOwnKing, makeMove } from "./chess"
+import { copyGameState, findPiece, getAttackZone, getAttackZones, getBoardSquare, isKingInCheck, doesMoveCheckOwnKing, makeMove, getPotentialLegalMoves, getAllPotentialLegalMoves } from "./chess"
 import { Board, Move, Piece, PieceColour, PieceType, Position } from "./chess.types"
 import { initial } from "./data/gameState"
 
@@ -657,6 +657,8 @@ describe("chess tests", () => {
             expect(gameState).toEqual(gameState2)
         })
 
+
+
         it("should be true, move doesnt change anything", () => {
             const gameState = initial();
             const gameState2 = initial();
@@ -667,6 +669,324 @@ describe("chess tests", () => {
             }
             doesMoveCheckOwnKing(gameState, move)
             expect(gameState).toEqual(gameState2)
+        })
+    })
+
+    describe("getPotentialLegalMoves", () => {
+        it("Should gets all king moves", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const from = {row: 4, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: from},
+                {piece: king, to: {row: 3, col: 4}, from: from},
+                {piece: king, to: {row: 3, col: 5}, from: from},
+                {piece: king, to: {row: 4, col: 3}, from: from},
+                {piece: king, to: {row: 4, col: 5}, from: from},
+                {piece: king, to: {row: 5, col: 3}, from: from},
+                {piece: king, to: {row: 5, col: 4}, from: from},
+                {piece: king, to: {row: 5, col: 5}, from: from},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("Should get king moves that dont put it into check", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            const from = {row: 4, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, bRook, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, bRook, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = [
+                {piece: king, to: {row: 4, col: 3}, from: from},
+                {piece: king, to: {row: 4, col: 5}, from: from},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("Should get king moves including capturing attacking queen", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            const from = {row: 4, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 4}, from: from, capturedPiece: bQueen},
+                {piece: king, to: {row: 5, col: 3}, from: from},
+                {piece: king, to: {row: 5, col: 5}, from: from},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("Gets king moves out of check, exlcude queen capture because it is guarded", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            const bPawn = {type: PieceType.PAWN, colour: PieceColour.BLACK}
+            const from = {row: 4, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, bPawn, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = [
+                {piece: king, to: {row: 5, col: 3}, from: from},
+                {piece: king, to: {row: 5, col: 5}, from: from},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("Should get no no king moves since king it is in checkmate", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            const bPawn = {type: PieceType.PAWN, colour: PieceColour.BLACK}
+            const from = {row: 4, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, bPawn, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, bQueen, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = []
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("Should not give pawn moves since it is blocking the king", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            const pawn = {type: PieceType.PAWN, colour: PieceColour.WHITE}
+            const from = {row: 2, col: 6}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [pawn, pawn, pawn, null, null, null, null, null  ],
+                [null, king, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = []
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+
+        it("Should a single rook move to block king", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const pawn = {type: PieceType.PAWN, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            const from = {row: 2, col: 2}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, rook, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [pawn, pawn, null, null, null, null, null, null  ],
+                [null, king, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = [
+                {piece: rook, to: {row: 6, col: 2}, from}
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        it("Should a single rook move to capture attacking queen", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const pawn = {type: PieceType.PAWN, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            const from = {row: 2, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, rook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [pawn, pawn, null, null, null, null, null, null  ],
+                [null, king, null, null, null, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, from)
+            const expected: Move[] = [
+                {piece: rook, to: {row: 4, col: 4}, from, capturedPiece: bQueen}
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+    })
+
+    describe("getAllPotentialLegalMoves", () => {
+
+        test("Should get white king moves", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const from = {row: 4, col: 4}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: from},
+                {piece: king, to: {row: 3, col: 4}, from: from},
+                {piece: king, to: {row: 3, col: 5}, from: from},
+                {piece: king, to: {row: 4, col: 3}, from: from},
+                {piece: king, to: {row: 4, col: 5}, from: from},
+                {piece: king, to: {row: 5, col: 3}, from: from},
+                {piece: king, to: {row: 5, col: 4}, from: from},
+                {piece: king, to: {row: 5, col: 5}, from: from},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get all white moves", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const fromKing = {row: 4, col: 4}
+            const fromRook = {row: 0, col: 0}
+            gameState.board = [
+                [rook, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: fromKing},
+                {piece: king, to: {row: 3, col: 4}, from: fromKing},
+                {piece: king, to: {row: 3, col: 5}, from: fromKing},
+                {piece: king, to: {row: 4, col: 3}, from: fromKing},
+                {piece: king, to: {row: 4, col: 5}, from: fromKing},
+                {piece: king, to: {row: 5, col: 3}, from: fromKing},
+                {piece: king, to: {row: 5, col: 4}, from: fromKing},
+                {piece: king, to: {row: 5, col: 5}, from: fromKing},
+                {piece: rook, to: {row: 1, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 2, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 3, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 4, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 5, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 6, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 7, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 1}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 2}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 3}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 5}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 6}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 7}, from: fromRook},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get all white moves excluding blocked movement", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const fromKing = {row: 4, col: 4}
+            const fromRook = {row: 0, col: 4}
+            gameState.board = [
+                [null, null, null, null, rook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: fromKing},
+                {piece: king, to: {row: 3, col: 4}, from: fromKing},
+                {piece: king, to: {row: 3, col: 5}, from: fromKing},
+                {piece: king, to: {row: 4, col: 3}, from: fromKing},
+                {piece: king, to: {row: 4, col: 5}, from: fromKing},
+                {piece: king, to: {row: 5, col: 3}, from: fromKing},
+                {piece: king, to: {row: 5, col: 4}, from: fromKing},
+                {piece: king, to: {row: 5, col: 5}, from: fromKing},
+                {piece: rook, to: {row: 1, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 2, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 3, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 1}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 2}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 3}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 5}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 6}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 7}, from: fromRook},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
         })
     })
 })
