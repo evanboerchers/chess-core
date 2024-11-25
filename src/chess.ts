@@ -1,4 +1,4 @@
-import { BoardSquare, GameOutcome, GameState, Move, Piece, PieceColour, PieceType, Position } from "./chess.types"
+import { BoardSquare, GameOutcome, GameState, Move, Piece, PieceColour, PieceRecord, PieceType, Position } from "./chess.types"
 import { attackZoneStrategyMap, movementStrategyMap } from "./movement"
 
 export const copyGameState = (gameState: GameState): GameState => {
@@ -27,6 +27,22 @@ export const findPiece = (gameState: GameState, piece: Piece): Position[] => {
         })
     })
     return positions
+}
+
+export const getPieceRecord = (gameState: GameState): PieceRecord => {
+    const record: PieceRecord = {
+        [PieceColour.WHITE]: {},
+        [PieceColour.BLACK]: {}
+    }
+    gameState.board.forEach((row,i) => {
+        row.forEach((current, j) => {
+            if (current) {
+                const count = record[current.colour][current.type] || 0
+                record[current.colour][current.type] = count + 1
+            }
+        })
+    })
+    return record
 }
 
 export const changeTurn = (gameState: GameState): GameState => {
@@ -152,6 +168,16 @@ export const isKingInCheckmate = (gameState: GameState, colour: PieceColour): bo
     return true
 }
 
+export const colourHasInsiffucientMaterial = (ganeState: GameState, colour: PieceColour): boolean => {
+    
+    return false
+}
+
+export const insufficentMaterial = (gameState: GameState): boolean => {
+    const record  = getPieceRecord(gameState)
+    return false;
+}
+
 export const getGameOutcome = (gameState: GameState): GameOutcome | null => {
     if(isKingInCheckmate(gameState, PieceColour.BLACK)) {
         return GameOutcome.WHITE
@@ -159,7 +185,7 @@ export const getGameOutcome = (gameState: GameState): GameOutcome | null => {
     if(isKingInCheckmate(gameState, PieceColour.WHITE)) {
         return GameOutcome.BLACK
     }
-    if(getAllPotentialLegalMoves(gameState, gameState.currentTurn)) {
+    if(getAllPotentialLegalMoves(gameState, gameState.currentTurn).length <= 0 || insufficentMaterial(gameState)) {
         return GameOutcome.DRAW
     }
     return null

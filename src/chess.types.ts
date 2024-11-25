@@ -21,6 +21,12 @@ export interface Piece {
   type: PieceType;
 }
 
+export type PieceRecord = {
+  [color in PieceColour]: Partial<{
+    [piece in PieceType]: number;
+  }>;
+};
+
 export interface Position {
   row: number;
   col: number;

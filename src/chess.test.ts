@@ -1,5 +1,5 @@
-import { copyGameState, findPiece, getAttackZone, getAttackZones, getBoardSquare, isKingInCheck, doesMoveCheckOwnKing, makeMove, getPotentialLegalMoves, getAllPotentialLegalMoves } from "./chess"
-import { Board, Move, Piece, PieceColour, PieceType, Position } from "./chess.types"
+import { copyGameState, findPiece, getAttackZone, getAttackZones, getBoardSquare, isKingInCheck, doesMoveCheckOwnKing, makeMove, getPotentialLegalMoves, getAllPotentialLegalMoves, isKingInCheckmate, getGameOutcome, getPieceRecord } from "./chess"
+import { Board, GameOutcome, Move, Piece, PieceColour, PieceRecord, PieceType, Position } from "./chess.types"
 import { initial } from "./data/gameState"
 
 describe("chess tests", () => {
@@ -62,6 +62,32 @@ describe("chess tests", () => {
             const expected: Position[] = []
             const actual = findPiece(gameState, piece)
             expect(actual).toHaveLength(expected.length);
+        })
+    })
+
+    describe("getPieceRecord", () => {
+        test("should have all initial peices", () => {
+            const gameState = initial();
+            const actual = getPieceRecord(gameState);
+            const expected: PieceRecord = {
+                [PieceColour.WHITE]: {
+                    [PieceType.PAWN]: 8,
+                    [PieceType.KNIGHT]: 2,
+                    [PieceType.BISHOP]: 2,
+                    [PieceType.ROOK]: 2,
+                    [PieceType.QUEEN]: 1,
+                    [PieceType.KING]: 1,
+                },
+                [PieceColour.BLACK]: {
+                    [PieceType.PAWN]: 8,
+                    [PieceType.KNIGHT]: 2,
+                    [PieceType.BISHOP]: 2,
+                    [PieceType.ROOK]: 2,
+                    [PieceType.QUEEN]: 1,
+                    [PieceType.KING]: 1,
+                }
+            }
+            expect(actual).toEqual(expected)
         })
     })
 
@@ -987,6 +1013,289 @@ describe("chess tests", () => {
             ]
             expect(actual).toHaveLength(expected.length);
             expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get all white moves excluding blocked movement", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const fromKing = {row: 4, col: 4}
+            const fromRook = {row: 0, col: 4}
+            gameState.board = [
+                [null, null, null, null, rook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: fromKing},
+                {piece: king, to: {row: 3, col: 4}, from: fromKing},
+                {piece: king, to: {row: 3, col: 5}, from: fromKing},
+                {piece: king, to: {row: 4, col: 3}, from: fromKing},
+                {piece: king, to: {row: 4, col: 5}, from: fromKing},
+                {piece: king, to: {row: 5, col: 3}, from: fromKing},
+                {piece: king, to: {row: 5, col: 4}, from: fromKing},
+                {piece: king, to: {row: 5, col: 5}, from: fromKing},
+                {piece: rook, to: {row: 1, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 2, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 3, col: 4}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 0}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 1}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 2}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 3}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 5}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 6}, from: fromRook},
+                {piece: rook, to: {row: 0, col: 7}, from: fromRook},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get white king moves out of check", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const fromKing = {row: 4, col: 4}
+            const fromRook = {row: 0, col: 0}
+            gameState.board = [
+                [rook, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: fromKing},
+                {piece: king, to: {row: 3, col: 5}, from: fromKing},
+                {piece: king, to: {row: 4, col: 3}, from: fromKing},
+                {piece: king, to: {row: 4, col: 5}, from: fromKing},
+                {piece: king, to: {row: 5, col: 3}, from: fromKing},
+                {piece: king, to: {row: 5, col: 5}, from: fromKing},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get white king moves out of check, and capture", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            const fromKing = {row: 4, col: 4}
+            const fromRook = {row: 0, col: 0}
+            gameState.board = [
+                [rook, null, null, null, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: king, to: {row: 3, col: 3}, from: fromKing},
+                {piece: king, to: {row: 3, col: 5}, from: fromKing},
+                {piece: king, to: {row: 4, col: 3}, from: fromKing},
+                {piece: king, to: {row: 4, col: 5}, from: fromKing},
+                {piece: king, to: {row: 5, col: 3}, from: fromKing},
+                {piece: king, to: {row: 5, col: 5}, from: fromKing},
+                {piece: rook, to: {row: 0, col: 4}, from: fromRook, capturedPiece: bRook},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get white blocking moves", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            const bishop = {type: PieceType.BISHOP, colour: PieceColour.WHITE}
+            const pawn = {type: PieceType.PAWN, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            gameState.board = [
+                [null, null, null, null, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, bishop, null, null, null, null ],
+                [null, null, null, null, null, bishop, null, null  ],
+                [null, null, null, pawn, null, pawn, null, null  ],
+                [null, null, null, rook, king, rook, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = [
+                {piece: bishop, from: {row: 4, col: 3}, to: {row: 3, col: 4}},
+                {piece: bishop, from: {row: 4, col: 3}, to: {row: 5, col: 4}},
+                {piece: bishop, from: {row: 5, col: 5}, to: {row: 4, col: 4}},
+                {piece: bishop, from: {row: 5, col: 5}, to: {row: 6, col: 4}},
+            ]
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test("Should get no moves since white is in checkmate", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            const pawn = {type: PieceType.PAWN, colour: PieceColour.WHITE}
+            const rook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            gameState.board = [
+                [null, null, null, null, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, pawn, null, pawn, null, null  ],
+                [null, null, null, rook, king, rook, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.WHITE)
+            const expected: Move[] = []
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+
+        test.only("Should get no moves since black is in checkmate", () => {
+            const gameState = initial();
+            const bKing = {type: PieceType.KING, colour: PieceColour.BLACK}
+            const wKing = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const wRook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [wRook, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getAllPotentialLegalMoves(gameState, PieceColour.BLACK)
+            const expected: Move[] = []
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
+    })
+
+    describe("isKingInCheckmate", () => {
+        test("should not be checkmate", () => {
+            const gameState = initial();
+            const actual = isKingInCheckmate(gameState, PieceColour.WHITE)
+            expect(actual).toBe(false);
+        })
+
+        test("should be in check but not checkmate", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            gameState.board =[
+                [null, null, null, null, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, king, null, null, null  ],
+            ]
+            const actual = isKingInCheckmate(gameState, PieceColour.WHITE)
+            expect(actual).toBe(false);
+        })
+
+        test("should be in checkmate", () => {
+            const gameState = initial();
+            const king = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const bRook = {type: PieceType.ROOK, colour: PieceColour.BLACK}
+            const bQueen = {type: PieceType.QUEEN, colour: PieceColour.BLACK}
+            gameState.board =[
+                [null, null, null, null, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bQueen, null, null, null  ],
+                [null, null, null, null, king, null, null, null  ],
+            ]
+            const actual = isKingInCheckmate(gameState, PieceColour.WHITE)
+            expect(actual).toBe(true);
+        })
+    })
+
+    describe("getGameOutcome", () => {
+        test("should be active game, returning null", () => {
+            const gameState = initial();
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
+        })
+
+        test("should be active game despite king in check", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const bRook: Piece = {colour: PieceColour.BLACK, type: PieceType.ROOK}
+            gameState.board = [
+                [null, null, null, bKing, bRook, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, wKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
+        })
+
+        test("should be a black win from checkmate", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const bRook: Piece = {colour: PieceColour.BLACK, type: PieceType.ROOK}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, bKing, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [bRook, null, null, null, wKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.BLACK);
+        })
+
+        test("should be a white win from checkmate", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wRook: Piece = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [wRook, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.WHITE);
         })
     })
 })
