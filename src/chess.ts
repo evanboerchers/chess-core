@@ -131,11 +131,8 @@ export const addMoveToHistory = (gameState: GameState, move: Move): GameState =>
 }
   
 export const doesMoveCheckOwnKing = (gameState: GameState, move: Move): boolean => {
-    if (gameState.currentTurn !== move.piece.colour) {
-        return false
-    }
-  const futureGameState = makeMove(copyGameState(gameState), move);
-  return isKingInCheck(futureGameState, move.piece.colour);
+    const futureGameState = makeMove(copyGameState(gameState), move);
+    return isKingInCheck(futureGameState, move.piece.colour);
 } 
 
 export const getPotentialLegalMoves = (gameState: GameState, position: Position): Move[] => {

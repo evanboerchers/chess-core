@@ -896,6 +896,27 @@ describe("chess tests", () => {
             expect(actual).toHaveLength(expected.length);
             expect(actual).toEqual(expect.arrayContaining(expected));
         })
+
+        test("Should get no moves since black is in checkmate", () => {
+            const gameState = initial();
+            const bKing = {type: PieceType.KING, colour: PieceColour.BLACK}
+            const wKing = {type: PieceType.KING, colour: PieceColour.WHITE}
+            const wRook = {type: PieceType.ROOK, colour: PieceColour.WHITE}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [wRook, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getPotentialLegalMoves(gameState, {row: 4, col: 7})
+            const expected: Move[] = []
+            expect(actual).toHaveLength(expected.length);
+            expect(actual).toEqual(expect.arrayContaining(expected));
+        })
     })
 
     describe("getAllPotentialLegalMoves", () => {
@@ -1167,7 +1188,7 @@ describe("chess tests", () => {
             expect(actual).toEqual(expect.arrayContaining(expected));
         })
 
-        test.only("Should get no moves since black is in checkmate", () => {
+        test("Should get no moves since black is in checkmate", () => {
             const gameState = initial();
             const bKing = {type: PieceType.KING, colour: PieceColour.BLACK}
             const wKing = {type: PieceType.KING, colour: PieceColour.WHITE}
@@ -1280,6 +1301,25 @@ describe("chess tests", () => {
         })
 
         test("should be a white win from checkmate", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wRook: Piece = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [wRook, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.WHITE);
+        })
+
+        test("should be a draw from no moves", () => {
             const gameState = initial();
             const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
             const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
