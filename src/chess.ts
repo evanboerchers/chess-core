@@ -165,14 +165,29 @@ export const isKingInCheckmate = (gameState: GameState, colour: PieceColour): bo
     return true
 }
 
-export const colourHasInsiffucientMaterial = (ganeState: GameState, colour: PieceColour): boolean => {
-    
+export const colourHasInsiffucientMaterial = (record: PieceRecord, colour: PieceColour): boolean => {
+    const pieces = record[colour]
+    const hasQueen = pieces[PieceType.QUEEN] > 0
+    const hasRook = pieces[PieceType.ROOK] > 0
+    const hasPawn = pieces[PieceType.PAWN] > 0
+    const hasBishop = pieces[PieceType.BISHOP] > 0
+    const hasBishops = pieces[PieceType.BISHOP] > 1
+    const hasKnight = pieces[PieceType.KNIGHT] > 0
+    const hasKnights = pieces[PieceType.KNIGHT] > 1
+    if (!hasQueen && !hasRook && !hasBishops && !hasKnight && !hasPawn){
+        return true
+    }
+    if (!hasQueen && !hasRook && !hasBishop && !hasKnights && !hasPawn){
+        return true
+    }
     return false
 }
 
 export const insufficentMaterial = (gameState: GameState): boolean => {
     const record  = getPieceRecord(gameState)
-    return false;
+    const white = colourHasInsiffucientMaterial(record, PieceColour.WHITE);
+    const black = colourHasInsiffucientMaterial(record, PieceColour.BLACK);
+    return white && black
 }
 
 export const getGameOutcome = (gameState: GameState): GameOutcome | null => {

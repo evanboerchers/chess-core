@@ -1,3 +1,0 @@
-describe("ChessGame class tests", () => {
-    
-})

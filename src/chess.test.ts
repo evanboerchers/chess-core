@@ -1324,6 +1324,25 @@ describe("chess tests", () => {
             const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
             const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
             const wRook: Piece = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            gameState.currentTurn = PieceColour.BLACK;
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, wRook, wKing, wRook, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.DRAW);
+        })
+
+        test("should be a draw from insufficient material. Only kings", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
             gameState.board = [
                 [null, null, null, null, null, null, null, null  ],
                 [null, null, null, null, null, null, null, null  ],
@@ -1332,10 +1351,162 @@ describe("chess tests", () => {
                 [null, null, null, null, null, null, null, null ],
                 [null, null, null, null, wKing, null, null, null  ],
                 [null, null, null, null, null, null, null, null  ],
-                [wRook, null, null, null, bKing, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
             ]
             const actual = getGameOutcome(gameState)
-            expect(actual).toBe(GameOutcome.WHITE);
+            expect(actual).toBe(GameOutcome.DRAW);
+        })
+
+        test("should be a draw from insufficient material. Lone white bishop", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wBishop: Piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wBishop, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.DRAW);
+        })
+
+        test("should not be a draw from insufficient material. Dual white bishops", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wBishop: Piece = {colour: PieceColour.WHITE, type: PieceType.BISHOP}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wBishop, null  ],
+                [null, null, null, null, null, null, wBishop, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
+        })
+
+        test("should be a draw from insufficient material. Lone black bishop", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const bBishop: Piece = {colour: PieceColour.BLACK, type: PieceType.BISHOP}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, bBishop, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.DRAW);
+        })
+
+        test("should be a draw from insufficient material. Lone white knight", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wKnight: Piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wKnight, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(GameOutcome.DRAW);
+        })
+
+        test("should not be draw from insufficient material. Dual white knights", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wKnight: Piece = {colour: PieceColour.WHITE, type: PieceType.KNIGHT}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wKnight, null  ],
+                [null, null, null, null, null, null, wKnight, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
+        })
+        
+        test("should not be draw from insufficient material. Lone pawn", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wPawn: Piece = {colour: PieceColour.WHITE, type: PieceType.PAWN}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wPawn, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
+        })
+
+        test("should not be draw from insufficient material. Lone rook", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wRook: Piece = {colour: PieceColour.WHITE, type: PieceType.ROOK}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wRook, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
+        })
+
+        test("should not be draw from insufficient material. Lone queen", () => {
+            const gameState = initial();
+            const wKing: Piece = {colour: PieceColour.WHITE, type: PieceType.KING}
+            const bKing: Piece = {colour: PieceColour.BLACK, type: PieceType.KING}
+            const wQueen: Piece = {colour: PieceColour.WHITE, type: PieceType.QUEEN}
+            gameState.board = [
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, null, null, null, null ],
+                [null, null, null, null, wKing, null, wQueen, null  ],
+                [null, null, null, null, null, null, null, null  ],
+                [null, null, null, null, bKing, null, null, null  ],
+            ]
+            const actual = getGameOutcome(gameState)
+            expect(actual).toBe(null);
         })
     })
 })
