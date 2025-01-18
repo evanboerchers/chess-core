@@ -1,4 +1,4 @@
-import initialData from "@data/game-states/initial.json";
+import initialData from "./game-states/initial.json";
 import { GameState } from "../chess.types";
 import { copyGameState } from "../chess";
 

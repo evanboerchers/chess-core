@@ -2,11 +2,7 @@
     "compilerOptions": {
         "target": "ES6",
         "module": "Commonjs",
-        "paths": {
-            "@data/*": [
-                "./data/*"
-            ]
-        },
+        "baseUrl": "./",
         "outDir": "./dist",
         "rootDir": "./src",
         "declaration": true,
