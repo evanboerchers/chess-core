@@ -5,7 +5,7 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     roots: ['<rootDir>/src'],
-    moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>' }),
+    moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>' }),
     testMatch: [
       '**/__tests__/**/*.+(ts|tsx|js)',
       '**/?(*.)+(spec|test).+(ts|tsx|js)'
