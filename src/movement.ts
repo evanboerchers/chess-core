@@ -392,11 +392,10 @@ export const pawnEnPassant: MovementStrategy<Move> = (
   const board = gameState.board
   const { row, col } = position;
   const current = board[row][col]
-  const moves: Move[] = []
+  if (!current) return []
   const lastMove = gameState.moveHistory.at(-1)
-  if (!lastMove) {
-    return moves;
-  }
+  if (!lastMove) return [];
+  const moves: Move[] = []
   const isOppPawn = lastMove.piece.colour !== current.colour && lastMove.piece.type === PieceType.PAWN 
   const isDoubleStartMove = lastMove.from.row === (lastMove.piece.colour === PieceColour.WHITE ? 6 : 1 ) &&
   lastMove.to.row  === (lastMove.piece.colour === PieceColour.WHITE ? 4 : 3 )

@@ -1,6 +1,7 @@
 {
   "name": "@evanboerchers/chess-core",
   "version": "1.0.0",
+  "description": "chess game library",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,9 +13,8 @@
     "build": "tsc",
     "test": "jest"
   },
-  "author": "",
+  "author": "evanboerchers",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.6",

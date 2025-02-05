@@ -98,7 +98,7 @@ export const makeMove = (gameState: GameState, move: Move): GameState => {
 export const movePiece = (gameState: GameState, from: Position, to: Position, promotionType?: Piece) => {
     const piece =  getBoardSquare(gameState, from);
     gameState.board[from.row][from.col] = null;
-    gameState.board[to.row][to.col] = piece || promotionType 
+    gameState.board[to.row][to.col] = piece || promotionType || null
     return gameState
 }
 
@@ -167,13 +167,13 @@ export const isKingInCheckmate = (gameState: GameState, colour: PieceColour): bo
 
 export const colourHasInsiffucientMaterial = (record: PieceRecord, colour: PieceColour): boolean => {
     const pieces = record[colour]
-    const hasQueen = pieces[PieceType.QUEEN] > 0
-    const hasRook = pieces[PieceType.ROOK] > 0
-    const hasPawn = pieces[PieceType.PAWN] > 0
-    const hasBishop = pieces[PieceType.BISHOP] > 0
-    const hasBishops = pieces[PieceType.BISHOP] > 1
-    const hasKnight = pieces[PieceType.KNIGHT] > 0
-    const hasKnights = pieces[PieceType.KNIGHT] > 1
+    const hasQueen = (pieces[PieceType.QUEEN] ?? 0) > 0
+    const hasRook = (pieces[PieceType.ROOK] ?? 0) > 0
+    const hasPawn = (pieces[PieceType.PAWN] ?? 0) > 0
+    const hasBishop = (pieces[PieceType.BISHOP] ?? 0) > 0
+    const hasBishops = (pieces[PieceType.BISHOP] ?? 0) > 1
+    const hasKnight = (pieces[PieceType.KNIGHT] ?? 0) > 0
+    const hasKnights = (pieces[PieceType.KNIGHT] ?? 0) > 1
     if (!hasQueen && !hasRook && !hasBishops && !hasKnight && !hasPawn){
         return true
     }
