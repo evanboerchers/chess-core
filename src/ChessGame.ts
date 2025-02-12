@@ -1,5 +1,5 @@
 import { getGameOutcome, getPotentialLegalMoves, isKingInCheck, isKingInCheckmate, makeMove } from "./chess";
-import { Board, GameOutcome, GameState, Move, PieceColour, Position } from "./chess.types";
+import { Board, BoardSquare, GameOutcome, GameState, Move, PieceColour, Position } from "./chess.types";
 import { initial } from "./data/gameState";
 
 export default class ChessGame {
@@ -29,6 +29,10 @@ export default class ChessGame {
         return getGameOutcome(this._gameState);
     }
 
+    public getPosition(position: Position): BoardSquare {
+        return this._gameState.board[position.row][position.col]
+    }
+
     public get gameState(): GameState {
         return this._gameState
     }
@@ -37,7 +41,7 @@ export default class ChessGame {
         return this._gameState.currentTurn
     }
 
-    public get  board(): Board {
+    public get board(): Board {
         return this._gameState.board
     }
 
