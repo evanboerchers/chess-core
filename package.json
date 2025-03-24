@@ -24,5 +24,9 @@
     "tsconfig-paths-jest": "^0.0.1",
     "tslib": "^2.8.1",
     "typescript": "^5.6.3"
-  }
+  },
+  "publishConfig": {
+  "access": "public"
+}
+
 }
