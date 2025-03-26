@@ -1,7 +1,7 @@
 {
   "name": "@evanboerchers/chess-core",
   "version": "1.0.1",
-  "description": "chess game library",
+  "description": "A Typescript chess game logic libary",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
