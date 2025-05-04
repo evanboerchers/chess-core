@@ -37,6 +37,10 @@ export default class ChessGame {
         return this._gameState
     }
 
+    public set gameState(gameState: GameState) {
+        this._gameState = gameState
+    }
+
     public get currentTurn(): PieceColour {
         return this._gameState.currentTurn
     }
